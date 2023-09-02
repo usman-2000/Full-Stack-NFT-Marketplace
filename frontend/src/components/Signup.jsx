@@ -10,7 +10,7 @@ const Signup = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post("https://localhost:5004/createuser", { username, email })
+      .post("https://localhost:5004//users/createuser", { username, email })
       .then((result) => console.log(result))
       .catch((err) => console.log(err));
   };
