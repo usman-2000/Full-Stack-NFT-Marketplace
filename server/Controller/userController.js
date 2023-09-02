@@ -1,23 +1,25 @@
 const users = require("../Model/userSchema");
 const moment = require("moment");
+const validator = require("validator");
 
 exports.userPost = async (req, res) => {
   const { username, email, walletAddress } = req.body;
   if (!username || !email || !walletAddress) {
     res.status(400).json({ error: "All fields are required" });
   }
+
   try {
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({ error: "Not a valid email address" });
+    }
     const preUser = await users.findOne({ walletAddress: walletAddress });
     if (preUser) {
-      res.status(400).json({ error: "User already exists" });
+      return res.status(400).json({ error: "User already exists" });
     } else {
-      const dateCreate = moment(new Date()).format("YYYY-MM-DD");
-
       const userData = new users({
         username,
         email,
         walletAddress,
-        dateCreated: dateCreate,
       });
       await userData.save();
       res.status(200).json(userData);
