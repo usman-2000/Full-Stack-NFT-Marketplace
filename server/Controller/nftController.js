@@ -24,6 +24,7 @@ exports.nftPost = async (req, res) => {
       ipfsHash,
       ownerAddress,
       sellerAddress,
+      active,
     });
     await nftData.save();
     res.status(200).json(nftData);
@@ -36,7 +37,7 @@ exports.nftPost = async (req, res) => {
 exports.getSingleNft = async (req, res) => {
   const { id } = req.params;
   try {
-    const singleNft = await users.findOne({
+    const singleNft = await nfts.findOne({
       _id: id,
     });
     res.status(200).json(singleNft);
@@ -49,7 +50,7 @@ exports.getSingleNft = async (req, res) => {
 exports.getOwnersNft = async (req, res) => {
   const { ownerAddress } = req.params;
   try {
-    const ownersNfts = await users.findOne({
+    const ownersNfts = await nfts.find({
       ownerAddress: ownerAddress,
     });
     res.status(200).json(ownersNfts);
@@ -60,12 +61,32 @@ exports.getOwnersNft = async (req, res) => {
 };
 
 exports.getAllNfts = async (req, res) => {
-  const { sellerAddress } = req.params;
   try {
-    const ownersNfts = await users.findOne({
-      ownerAddress: ownerAddress,
-    });
-    res.status(200).json(ownersNfts);
+    const allNfts = await nfts.find();
+    res.status(200).json(allNfts);
+  } catch (error) {
+    res.status(400).json({ error: error });
+    console.log("catch block error" + error);
+  }
+};
+
+exports.getActiveNfts = async (req, res) => {
+  const { active } = req.params;
+  try {
+    const activeNfts = await nfts.find({ active: active });
+    res.status(200).json(activeNfts);
+  } catch (error) {
+    res.status(400).json({ error: error });
+    console.log("catch block error" + error);
+  }
+};
+
+exports.getNftsByTitle = async (req, res) => {
+  const { title } = req.params;
+
+  try {
+    const nftsByName = await nfts.find({ title: title.trim() });
+    res.status(200).json(nftsByName);
   } catch (error) {
     res.status(400).json({ error: error });
     console.log("catch block error" + error);
