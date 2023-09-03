@@ -9,7 +9,8 @@ exports.nftPost = async (req, res) => {
     description ||
     ipfsHash ||
     ownerAddress ||
-    sellerAddress
+    sellerAddress ||
+    active
   ) {
     res.status(400).json({ error: "All fields are required" });
   }

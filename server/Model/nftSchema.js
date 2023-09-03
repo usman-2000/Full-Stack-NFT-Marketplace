@@ -26,6 +26,10 @@ const nftSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  active: {
+    type: Boolean,
+    required: true,
+  },
 });
 
 const nfts = new mongoose.model("nfts", nftSchema);
