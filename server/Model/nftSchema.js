@@ -22,7 +22,15 @@ const nftSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  contractAddress: {
+    type: String,
+    required: true,
+  },
   sellerAddress: {
+    type: String,
+    required: true,
+  },
+  tokenId: {
     type: String,
     required: true,
   },
@@ -33,4 +41,4 @@ const nftSchema = new mongoose.Schema({
 });
 
 const nfts = new mongoose.model("nfts", nftSchema);
-module.exports(nfts);
+module.exports = nfts;

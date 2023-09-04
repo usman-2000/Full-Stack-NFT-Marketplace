@@ -1,0 +1,27 @@
+.mint-comp {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100vw;
+  /* height: 70vh; */
+  align-items: center;
+  color: white;
+}
+
+.mint-form form {
+  display: flex;
+  flex-direction: column;
+  width: 350px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.mint-form form input {
+  font-size: 1.1rem;
+  height: 20px;
+  padding: 10px;
+}
+.mint-form form label {
+  font-size: 1.1rem;
+  font-weight: 600;
+}

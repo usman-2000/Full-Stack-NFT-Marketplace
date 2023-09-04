@@ -1,0 +1,32 @@
+.createnft-comp {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100vw;
+  /* height: 70vh; */
+  align-items: center;
+  color: white;
+}
+
+.createnft-form form {
+  display: flex;
+  flex-direction: column;
+  width: 350px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.createnft-form form input {
+  font-size: 1.1rem;
+  height: 20px;
+  padding: 10px;
+}
+.createnft-form form label {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.checkbox-cont {
+  display: flex;
+  flex-direction: row;
+}

@@ -43,5 +43,9 @@
 .btn:hover {
   cursor: pointer;
   /* background-color: rgb(121, 121, 187); */
-  background: -webkit-linear-gradient(#62b98b, #a77b7b, rgb(122, 122, 167));
+  background: -webkit-linear-gradient(
+    #081277,
+    rgb(81, 81, 223),
+    rgb(182, 182, 196)
+  );
 }

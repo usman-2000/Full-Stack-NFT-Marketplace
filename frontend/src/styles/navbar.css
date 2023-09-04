@@ -23,7 +23,11 @@
 }
 
 .navbar-logo-cont h1 {
-  background: -webkit-linear-gradient(#62b98b, #a77b7b, rgb(122, 122, 167));
+  background: -webkit-linear-gradient(
+    #081277,
+    rgb(81, 81, 223),
+    rgb(182, 182, 196)
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -46,7 +50,11 @@
 }
 
 .btn-wallet-connect:hover {
-  background: -webkit-linear-gradient(#62b98b, #a77b7b, rgb(122, 122, 167));
+  background: -webkit-linear-gradient(
+    #081277,
+    rgb(81, 81, 223),
+    rgb(182, 182, 196)
+  );
 
   /* -webkit-background-clip: text; */
   /* -webkit-text-fill-color: transparent; */
