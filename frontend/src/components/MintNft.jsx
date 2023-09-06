@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import React from "react";
 import "../styles/mintnft.css";
 import { uploadFileToIPFS, uploadJSONToIPFS } from "../pinata";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const MintNft = () => {
   const ethers = require("ethers");
@@ -18,19 +20,25 @@ const MintNft = () => {
   const sellerAddress = "0x21312312312312312312312";
   const contractAddress = "0x21312312312312312312312";
 
-  async function disableButton() {
-    const listButton = document.getElementById("list-button");
-    listButton.disabled = true;
-    listButton.style.backgroundColor = "grey";
-    listButton.style.opacity = 0.3;
-  }
+  useEffect(() => {
+    setOwnerAddress(localStorage.getItem("address"));
+  });
 
-  async function enableButton() {
-    const listButton = document.getElementById("list-button");
-    listButton.disabled = false;
-    listButton.style.backgroundColor = "#A500FF";
-    listButton.style.opacity = 1;
-  }
+  const navigate = useNavigate();
+
+  // async function disableButton() {
+  //   const listButton = document.getElementById("list-button");
+  //   listButton.disabled = true;
+  //   listButton.style.backgroundColor = "grey";
+  //   listButton.style.opacity = 0.3;
+  // }
+
+  // async function enableButton() {
+  //   const listButton = document.getElementById("list-button");
+  //   listButton.disabled = false;
+  //   listButton.style.backgroundColor = "#A500FF";
+  //   listButton.style.opacity = 1;
+  // }
   async function OnChangeFile(e) {
     var file = e.target.files[0];
     try {
@@ -42,6 +50,7 @@ const MintNft = () => {
         // enableButton();
         updateMessage("");
         console.log("Uploaded image to Pinata: ", response.pinataURL);
+        setIpfsHash(response.pinataURL);
         setFileURL(response.pinataURL);
       }
     } catch (e) {
@@ -85,7 +94,7 @@ const MintNft = () => {
       //After adding your Hardhat network to your metamask, this code will get providers and signers
       // const provider = new ethers.providers.Web3Provider(window.ethereum);
       // const signer = provider.getSigner();
-      disableButton();
+      // disableButton();
       updateMessage(
         "Uploading NFT(takes 5 mins).. please dont click anything!"
       );
@@ -102,8 +111,28 @@ const MintNft = () => {
       // let transaction = await contract.createToken(metadataURL, price, { value: listingPrice })
       // await transaction.wait()
 
+      try {
+        await axios
+          .post("http://localhost:5004/nfts/createnft", {
+            title,
+            price,
+            description,
+            ipfsHash,
+            ownerAddress,
+            contractAddress,
+            sellerAddress,
+            tokenId,
+            active,
+          })
+          .then((result) => console.log(result));
+        navigate("/");
+      } catch (error) {
+        console.log(error);
+        alert(error.response.data.error);
+      }
+
       alert("Successfully listed your NFT!");
-      enableButton();
+      // enableButton();
       updateMessage("");
       // updateFormParams({ name: '', description: '', price: ''});
       title = "";
@@ -149,18 +178,18 @@ const MintNft = () => {
             onChange={(e) => setDescription(e.target.value)}
             required={true}
           />
-          <label htmlFor="">Wallet Address</label>
+          {/* <label htmlFor="">Wallet Address</label>
           <input
             type="text"
             placeholder="Enter your wallet address"
             onChange={(e) => setOwnerAddress(e.target.value)}
             required={true}
-          />
+          /> */}
 
           <label>Upload Image (&lt;500 KB)</label>
           <input type={"file"} onChange={OnChangeFile}></input>
           {/* <Link to="/"> */}
-          <h2>{message}</h2>
+          <p>{message}</p>
           <button type="submit" className="btn list-button" onClick={listNFT}>
             Mint and List
           </button>
