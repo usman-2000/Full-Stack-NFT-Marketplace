@@ -4,10 +4,14 @@ import "../styles/mintnft.css";
 import { uploadFileToIPFS, uploadJSONToIPFS } from "../pinata";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import CryptoCrafters from "../CryptoCrafters.json";
+import Marketplace from "../Marketplace.json";
+import { createWalletClient, custom } from "viem";
+import { mainnet, sepolia } from "viem/chains";
+const ethers = require("ethers");
+import { useContractWrite, usePrepareContractWrite } from "wagmi";
 
 const MintNft = () => {
-  const ethers = require("ethers");
-
   const [title, setTitle] = useState();
   const [price, setPrice] = useState();
   const [description, setDescription] = useState();
@@ -17,8 +21,13 @@ const MintNft = () => {
   const [message, updateMessage] = useState("");
   const [tokenId, setTokenId] = useState(1);
   const active = true;
-  const sellerAddress = "0x21312312312312312312312";
-  const contractAddress = "0x21312312312312312312312";
+  const sellerAddress = "0x9f5fe62dCd7c09f77B5e6d8c41BEAc80Df56db0A";
+  const contractAddress = "0x6dA135287f373535E73c4e4CF9810bed6ceE6639";
+
+  const client = createWalletClient({
+    chain: sepolia,
+    transport: custom(window.ethereum),
+  });
 
   useEffect(() => {
     setOwnerAddress(localStorage.getItem("address"));
@@ -26,28 +35,14 @@ const MintNft = () => {
 
   const navigate = useNavigate();
 
-  // async function disableButton() {
-  //   const listButton = document.getElementById("list-button");
-  //   listButton.disabled = true;
-  //   listButton.style.backgroundColor = "grey";
-  //   listButton.style.opacity = 0.3;
-  // }
-
-  // async function enableButton() {
-  //   const listButton = document.getElementById("list-button");
-  //   listButton.disabled = false;
-  //   listButton.style.backgroundColor = "#A500FF";
-  //   listButton.style.opacity = 1;
-  // }
   async function OnChangeFile(e) {
     var file = e.target.files[0];
     try {
       //upload the file to IPFS
-      // disableButton();
+
       updateMessage("Uploading image.. please dont click anything!");
       const response = await uploadFileToIPFS(file);
       if (response.success === true) {
-        // enableButton();
         updateMessage("");
         console.log("Uploaded image to Pinata: ", response.pinataURL);
         setIpfsHash(response.pinataURL);
@@ -84,6 +79,32 @@ const MintNft = () => {
     }
   }
 
+  const { config: mintConfig } = usePrepareContractWrite({
+    address: CryptoCrafters.address,
+    abi: CryptoCrafters.abi,
+    functionName: "safeMint",
+    args: [ownerAddress, tokenId, ipfsHash],
+  });
+  const {
+    data,
+    isLoading,
+    isSuccess,
+    write: safeMint,
+  } = useContractWrite(mintConfig);
+
+  const { config: listConfig } = usePrepareContractWrite({
+    address: Marketplace.address,
+    abi: Marketplace.abi,
+    functionName: "listNft",
+    args: [ownerAddress, tokenId, ipfsHash],
+  });
+  const {
+    data: listData,
+    isLoading: listIsLoading,
+    isSuccess: listIsSuccess,
+    write: listNft,
+  } = useContractWrite(listConfig);
+
   async function listNFT(e) {
     e.preventDefault();
 
@@ -94,22 +115,64 @@ const MintNft = () => {
       //After adding your Hardhat network to your metamask, this code will get providers and signers
       // const provider = new ethers.providers.Web3Provider(window.ethereum);
       // const signer = provider.getSigner();
-      // disableButton();
+
+      // Provider and signer
+      // const [address] = await client.getAddresses();
+      // let provider;
+      // let signer;
+      // if (
+      // typeof window !== "undefined" &&
+      // typeof window.ethereum !== "undefined"
+      // ) {
+      // provider = new ethers.providers.Web3Provider(window.ethereum);
+      // signer = provider.getSigner();
+      // signer =
+      // }
+
       updateMessage(
         "Uploading NFT(takes 5 mins).. please dont click anything!"
       );
 
       //Pull the deployed contract instance
-      // let contract = new ethers.Contract(Marketplace.address, Marketplace.abi, signer)
+      // let cryptoCraftersContract = new ethers.Contract(
+      //   CryptoCrafters.address,
+      //   CryptoCrafters.abi
+      // );
+
+      // let marketplaceContract = new ethers.Contract(
+      //   CryptoCrafters.address,
+      //   CryptoCrafters.abi,
+      //   client
+      // );
 
       //massage the params to be sent to the create NFT request
       // const price = ethers.utils.parseUnits(formParams.price, 'ether')
       // let listingPrice = await contract.getListPrice()
       // listingPrice = listingPrice.toString()
 
-      //actually create the NFT
-      // let transaction = await contract.createToken(metadataURL, price, { value: listingPrice })
-      // await transaction.wait()
+      // minting an nft
+      // let mintingNft = await cryptoCraftersContract.safeMint(
+      //   ownerAddress,
+      //   tokenId,
+      //   ipfsHash
+      // );
+
+      // await mintingNft.wait();
+
+      // Listing Nft
+      // let listingPrice = { value: ethers.utils.parseEther("0.0025") };
+      // let listNft = await marketplaceContract.listNft(
+      //   metadataURL,
+      //   price,
+      //   listingPrice
+      // );
+      // await listNft.wait();
+
+      safeMint();
+
+      updateMessage(
+        "Uploading NFT(takes 5 mins).. please dont click anything!"
+      );
 
       try {
         await axios
@@ -138,6 +201,7 @@ const MintNft = () => {
       title = "";
       description = "";
       price = "";
+      setTokenId(tokenId + 1);
 
       window.location.replace("/");
     } catch (e) {
@@ -151,11 +215,13 @@ const MintNft = () => {
     <div className="mint-comp">
       <h1>Mint Your Own Token</h1>
       <div className="mint-form">
-        <h3>Your Token ID will be = {tokenId}</h3>
-        <h2>The Contract address is :</h2>
-        <h2> 0x3143241212300000000000021312312</h2>
-        <h2>Seller Address is : </h2>
-        <h2>{sellerAddress}</h2>
+        <p>Your Token ID will be = {tokenId}</p>
+        <p>The Contract address is :</p>
+        <p>{contractAddress}</p>
+        <p>Seller Address is : </p>
+        <p>{sellerAddress}</p>
+        <p>Listing price : 0.0025 ethers</p>
+
         <form>
           <label htmlFor="">Title</label>
           <input
