@@ -6,7 +6,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import CryptoCrafters from "../CryptoCrafters.json";
 import Marketplace from "../Marketplace.json";
-import { createWalletClient, custom } from "viem";
+import { createWalletClient, custom, parseEther } from "viem";
 import { mainnet, sepolia } from "viem/chains";
 const ethers = require("ethers");
 import { useContractWrite, usePrepareContractWrite } from "wagmi";
@@ -79,6 +79,24 @@ const MintNft = () => {
     }
   }
 
+  const { config: approveNftContract } = usePrepareContractWrite({
+    address: CryptoCrafters.address,
+    abi: CryptoCrafters.abi,
+    functionName: "setApprovalForAll",
+    args: [CryptoCrafters.address, true],
+  });
+  const { write: setApproveNftContract } = useContractWrite(approveNftContract);
+
+  const { config: approveMarketplaceContract } = usePrepareContractWrite({
+    address: CryptoCrafters.address,
+    abi: CryptoCrafters.abi,
+    functionName: "safeMint",
+    args: [ownerAddress, tokenId, ipfsHash],
+  });
+  const { write: setApproveMarketplaceContract } = useContractWrite(
+    approveMarketplaceContract
+  );
+
   const { config: mintConfig } = usePrepareContractWrite({
     address: CryptoCrafters.address,
     abi: CryptoCrafters.abi,
@@ -96,7 +114,8 @@ const MintNft = () => {
     address: Marketplace.address,
     abi: Marketplace.abi,
     functionName: "listNft",
-    args: [ownerAddress, tokenId, ipfsHash],
+    value: parseEther("0.0025"),
+    args: [CryptoCrafters.address, tokenId, price],
   });
   const {
     data: listData,
@@ -169,6 +188,13 @@ const MintNft = () => {
       // await listNft.wait();
 
       safeMint();
+      isSuccess ?? console.log("Nft minted");
+      setApproveNftContract();
+      setApproveMarketplaceContract();
+      listNft();
+      listIsSuccess
+        ? console.log("Nft listed to marketplace")
+        : console.log("");
 
       updateMessage(
         "Uploading NFT(takes 5 mins).. please dont click anything!"
