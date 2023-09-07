@@ -2,6 +2,18 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import "../styles/nftdetailpage.css";
+import { useNavigate } from "react-router-dom";
+import CryptoCrafters from "../CryptoCrafters.json";
+import Marketplace from "../Marketplace.json";
+import { createWalletClient, custom, parseEther } from "viem";
+import { mainnet, sepolia } from "viem/chains";
+import {
+  useContractWrite,
+  usePrepareContractWrite,
+  useContractRead,
+} from "wagmi";
+import { createPublicClient } from "viem";
+const ethers = require("ethers");
 
 const NftDetailPage = () => {
   const [data, setData] = useState({});
@@ -12,9 +24,6 @@ const NftDetailPage = () => {
         .then((res) => {
           console.log("Res", res.data);
           setData(res.data);
-          //   localStorage.setItem("tokenId", res.data.tokenId);
-          //   localStorage.setItem("contractAddress", res.data.contractAddress);
-          //   localStorage.setItem("price", res.data.price);
         });
     } catch (error) {
       console.log({ error });
