@@ -8,8 +8,13 @@ import CryptoCrafters from "../CryptoCrafters.json";
 import Marketplace from "../Marketplace.json";
 import { createWalletClient, custom, parseEther } from "viem";
 import { mainnet, sepolia } from "viem/chains";
+import {
+  useContractWrite,
+  usePrepareContractWrite,
+  useContractRead,
+} from "wagmi";
+import { createPublicClient } from "viem";
 const ethers = require("ethers");
-import { useContractWrite, usePrepareContractWrite } from "wagmi";
 
 const MintNft = () => {
   const [title, setTitle] = useState();
@@ -19,7 +24,7 @@ const MintNft = () => {
   const [ownerAddress, setOwnerAddress] = useState(); // wallet address
   const [fileURL, setFileURL] = useState();
   const [message, updateMessage] = useState("");
-  const [tokenId, setTokenId] = useState(1);
+  const [tokenId, setTokenId] = useState("");
   const active = true;
   const sellerAddress = "0x9f5fe62dCd7c09f77B5e6d8c41BEAc80Df56db0A";
   const contractAddress = "0x6dA135287f373535E73c4e4CF9810bed6ceE6639";
@@ -28,10 +33,28 @@ const MintNft = () => {
     chain: sepolia,
     transport: custom(window.ethereum),
   });
+  // const publicClient = createPublicClient({
+  //   chain: sepolia,
+  //   // transport: http(),
+  // });
+
+  // const getTokenId = useContractRead({
+  //   address: CryptoCrafters.address,
+  //   abi: CryptoCrafters.abi,
+  //   functionName: "getTokenId",
+  // });
+  // const getTokenId = publicClient.readContract({
+  //   address: CryptoCrafters.address,
+  //   abi: CryptoCrafters.abi,
+  //   functionName: "getTokenId",
+  // });
 
   useEffect(() => {
     setOwnerAddress(localStorage.getItem("address"));
+    // getTokenId();
+    // setTokenId(getTokenId.error);
   });
+  console.log("the tokenId is ", tokenId);
 
   const navigate = useNavigate();
 
@@ -90,8 +113,8 @@ const MintNft = () => {
   const { config: approveMarketplaceContract } = usePrepareContractWrite({
     address: CryptoCrafters.address,
     abi: CryptoCrafters.abi,
-    functionName: "safeMint",
-    args: [ownerAddress, tokenId, ipfsHash],
+    functionName: "setApprovalForAll",
+    args: [Marketplace.address, true],
   });
   const { write: setApproveMarketplaceContract } = useContractWrite(
     approveMarketplaceContract
@@ -101,7 +124,7 @@ const MintNft = () => {
     address: CryptoCrafters.address,
     abi: CryptoCrafters.abi,
     functionName: "safeMint",
-    args: [ownerAddress, tokenId, ipfsHash],
+    args: [ownerAddress, ipfsHash],
   });
   const {
     data,
@@ -121,7 +144,7 @@ const MintNft = () => {
     data: listData,
     isLoading: listIsLoading,
     isSuccess: listIsSuccess,
-    write: listNft,
+    write: listingNft,
   } = useContractWrite(listConfig);
 
   async function listNFT(e) {
@@ -131,67 +154,21 @@ const MintNft = () => {
     try {
       const metadataURL = await uploadMetadataToIPFS();
       if (metadataURL === -1) return;
-      //After adding your Hardhat network to your metamask, this code will get providers and signers
-      // const provider = new ethers.providers.Web3Provider(window.ethereum);
-      // const signer = provider.getSigner();
-
-      // Provider and signer
-      // const [address] = await client.getAddresses();
-      // let provider;
-      // let signer;
-      // if (
-      // typeof window !== "undefined" &&
-      // typeof window.ethereum !== "undefined"
-      // ) {
-      // provider = new ethers.providers.Web3Provider(window.ethereum);
-      // signer = provider.getSigner();
-      // signer =
-      // }
 
       updateMessage(
         "Uploading NFT(takes 5 mins).. please dont click anything!"
       );
 
-      //Pull the deployed contract instance
-      // let cryptoCraftersContract = new ethers.Contract(
-      //   CryptoCrafters.address,
-      //   CryptoCrafters.abi
-      // );
-
-      // let marketplaceContract = new ethers.Contract(
-      //   CryptoCrafters.address,
-      //   CryptoCrafters.abi,
-      //   client
-      // );
-
-      //massage the params to be sent to the create NFT request
-      // const price = ethers.utils.parseUnits(formParams.price, 'ether')
-      // let listingPrice = await contract.getListPrice()
-      // listingPrice = listingPrice.toString()
-
-      // minting an nft
-      // let mintingNft = await cryptoCraftersContract.safeMint(
-      //   ownerAddress,
-      //   tokenId,
-      //   ipfsHash
-      // );
-
-      // await mintingNft.wait();
-
-      // Listing Nft
-      // let listingPrice = { value: ethers.utils.parseEther("0.0025") };
-      // let listNft = await marketplaceContract.listNft(
-      //   metadataURL,
-      //   price,
-      //   listingPrice
-      // );
-      // await listNft.wait();
-
       safeMint();
       isSuccess ?? console.log("Nft minted");
       setApproveNftContract();
       setApproveMarketplaceContract();
-      listNft();
+      try {
+        listingNft();
+      } catch (error) {
+        console.log(error);
+      }
+
       listIsSuccess
         ? console.log("Nft listed to marketplace")
         : console.log("");
@@ -224,14 +201,14 @@ const MintNft = () => {
       // enableButton();
       updateMessage("");
       // updateFormParams({ name: '', description: '', price: ''});
-      title = "";
-      description = "";
-      price = "";
+      setTitle("");
+      setDescription("");
+      setPrice("");
       setTokenId(tokenId + 1);
 
       window.location.replace("/");
     } catch (e) {
-      alert("Upload error" + e);
+      alert("Upload error --:--> " + e);
     }
   }
 
@@ -241,7 +218,7 @@ const MintNft = () => {
     <div className="mint-comp">
       <h1>Mint Your Own Token</h1>
       <div className="mint-form">
-        <p>Your Token ID will be = {tokenId}</p>
+        {/* <p>Your Token ID will be = {tokenId}</p> */}
         <p>The Contract address is :</p>
         <p>{contractAddress}</p>
         <p>Seller Address is : </p>

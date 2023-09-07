@@ -1,0 +1,90 @@
+.detail-component {
+  background-color: white;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.detail-img-cont {
+  width: 40%;
+  height: 70%;
+  border: 1px solid gainsboro;
+  padding: 10px;
+}
+.detail-img-cont img {
+  width: 100%;
+  height: 100%;
+}
+
+.detail-info-cont {
+  width: 40%;
+  height: 70%;
+  border: 1px solid gainsboro;
+  padding: 10px;
+}
+.detail-info-cont h1 {
+  font-size: 2.3rem;
+}
+
+@media (max-width: 900px) {
+  .detail-info-cont p {
+    font-size: 0.9rem;
+  }
+
+  .detail-info-cont h1 {
+    font-size: 2rem;
+  }
+  .detail-img-cont {
+    width: 40%;
+    height: 70%;
+  }
+  .detail-info-cont {
+    width: 40%;
+    height: 70%;
+  }
+}
+
+@media (min-width: 630px) and (max-width: 800px) {
+  .detail-info-cont p {
+    font-size: 0.7rem;
+  }
+
+  .detail-info-cont h1 {
+    font-size: 1.8rem;
+  }
+  .detail-img-cont {
+    width: 40%;
+    height: 50%;
+  }
+  .detail-info-cont {
+    width: 40%;
+    height: 50%;
+  }
+}
+
+@media (max-width: 630px) {
+  .detail-component {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .detail-info-cont p {
+    font-size: 0.7rem;
+  }
+
+  .detail-info-cont h1 {
+    font-size: 1.9rem;
+  }
+  .detail-img-cont {
+    width: 80%;
+    height: 90%;
+  }
+  .detail-info-cont {
+    width: 80%;
+    height: 90%;
+  }
+}

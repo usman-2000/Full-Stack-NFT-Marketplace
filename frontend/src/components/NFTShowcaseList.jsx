@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import React from "react";
 import "../styles/nftshowcaselist.css";
 import axios from "axios";
-import nftImage from "../utilities/nftImage.png";
+// import nftImage from "../utilities/nftImage.png";
+import { Link } from "react-router-dom";
 
 const NFTShowcaseList = () => {
   const [data, setData] = useState([]);
@@ -38,12 +39,14 @@ const NFTShowcaseList = () => {
               <div className="detail-cont">
                 <h3>Name : {e.title}</h3>
                 <h3>Price : {e.price}</h3>
-                <button className="detail-btn">Detail</button>
-                {e.active ? (
+                <Link to={`/${e._id}`}>
+                  <button className="detail-btn">Detail</button>
+                </Link>
+                {/* {e.active ? (
                   <button className="detail-btn">Buy Nft</button>
                 ) : (
                   <h3>Not listed For Sale</h3>
-                )}
+                )} */}
               </div>
             </div>
           );

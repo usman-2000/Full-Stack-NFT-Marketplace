@@ -1,5 +1,5 @@
 {
-  "address": "0x6dA135287f373535E73c4e4CF9810bed6ceE6639",
+  "address": "0x1009e328437D9B3aF764e08E57D1A5c7B8DFEDe5",
   "abi": [
     {
       "inputs": [],
@@ -183,6 +183,19 @@
           "internalType": "address",
           "name": "",
           "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getTokenId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
         }
       ],
       "stateMutability": "view",
