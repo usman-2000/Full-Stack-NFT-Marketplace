@@ -1,5 +1,5 @@
 {
-  "address": "0x1009e328437D9B3aF764e08E57D1A5c7B8DFEDe5",
+  "address": "0xaDa04DEfc8ee70452faf8D4b85EBf6bEB24d40Bc",
   "abi": [
     {
       "inputs": [],
@@ -131,6 +131,19 @@
       ],
       "name": "Transfer",
       "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "_tokenIdCounter",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
     },
     {
       "inputs": [

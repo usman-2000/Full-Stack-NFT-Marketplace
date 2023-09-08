@@ -13,6 +13,7 @@ import { publicProvider } from "wagmi/providers/public";
 import ListNft from "./components/ListNft";
 import MintNft from "./components/MintNft";
 import NftDetailPage from "./components/NftDetailPage";
+import MyNfts from "./components/MyNfts";
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
   [mainnet, sepolia],
@@ -35,6 +36,7 @@ function App() {
           <Route path="createuser" element={<Signup />}></Route>
           <Route path="listnft" element={<ListNft />}></Route>
           <Route path="mintnft" element={<MintNft />}></Route>
+          <Route path="mynfts" element={<MyNfts />}></Route>
         </Routes>
       </BrowserRouter>
     </WagmiConfig>

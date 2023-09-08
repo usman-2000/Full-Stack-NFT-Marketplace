@@ -1,34 +1,38 @@
-import { useState, useEffect } from "react";
-import React from "react";
+import React, { useState, useEffect } from "react";
+import "../styles/mynfts";
 import "../styles/nftshowcaselist.css";
-import axios from "axios";
-// import nftImage from "../utilities/nftImage.png";
-import { Link } from "react-router-dom";
 
-const NFTShowcaseList = () => {
+import { Link } from "react-router-dom";
+import axios from "axios";
+import { useParams } from "react-router-dom";
+
+const MyNfts = () => {
   const [data, setData] = useState([]);
+  const [ownerAddress, setOwnerAddress] = useState();
+  const params = useParams();
   async function fetchData() {
     try {
-      await axios.get("http://localhost:5004/nfts/getallnfts").then((res) => {
-        console.log("Res", res.data);
-        setData(res.data);
-      });
+      await axios
+        .get(`http://localhost:5004/nfts/getownersnfts/${ownerAddress}`)
+        .then((res) => {
+          console.log("Res", res.data);
+          setData(res.data);
+        });
     } catch (error) {
       console.log({ error });
     }
   }
-  // console.log(data[0]);
-  // fetchData();
+
   useEffect(() => {
+    setOwnerAddress(localStorage.getItem("address"));
     console.log("check", data);
-    if (data.length === 0) {
-      // console.log("check");
-      fetchData();
-    }
-  }, [data]);
+    // if (data.length === 0) {
+    fetchData();
+    // }
+  }, []);
   return (
     <div className="nftshowcase-cont">
-      <h1>Top Nfts</h1>
+      <h1>My Nfts</h1>
       <div className="nft-card-cont">
         {data.map((e, i) => {
           return (
@@ -42,7 +46,6 @@ const NFTShowcaseList = () => {
                 <Link to={`/${e._id}`}>
                   <button className="detail-btn">Detail</button>
                 </Link>
-                {e.active ? <div></div> : <h3>Not listed For Sale</h3>}
               </div>
             </div>
           );
@@ -52,4 +55,4 @@ const NFTShowcaseList = () => {
   );
 };
 
-export default NFTShowcaseList;
+export default MyNfts;

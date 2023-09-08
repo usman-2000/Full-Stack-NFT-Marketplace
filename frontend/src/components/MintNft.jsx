@@ -49,12 +49,26 @@ const MintNft = () => {
   //   functionName: "getTokenId",
   // });
 
+  // const wagmigotchiContract = {
+  //   address: "0xecb504d39723b0be0e3a9aa33d646642d1051ee1",
+  //   abi: CryptoCrafters.abi,
+  // };
+
+  const {
+    data: dataTokenId,
+    isError,
+    isLoading: isTokenIdLoading,
+  } = useContractRead({
+    address: "0xaDa04DEfc8ee70452faf8D4b85EBf6bEB24d40Bc",
+    abi: CryptoCrafters.abi,
+    functionName: "getTokenId",
+  });
+
   useEffect(() => {
     setOwnerAddress(localStorage.getItem("address"));
-    // getTokenId();
-    // setTokenId(getTokenId.error);
+    console.log("token Id ", dataTokenId?.toString());
   });
-  console.log("the tokenId is ", tokenId);
+  // console.log("the tokenId is ", tokenId);
 
   const navigate = useNavigate();
 
@@ -255,7 +269,7 @@ const MintNft = () => {
             required={true}
           /> */}
 
-          <label>Upload Image (&lt;500 KB)</label>
+          <label>Upload Image</label>
           <input type={"file"} onChange={OnChangeFile}></input>
           {/* <Link to="/"> */}
           <p>{message}</p>
