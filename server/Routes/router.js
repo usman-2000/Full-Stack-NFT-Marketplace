@@ -12,5 +12,6 @@ router.get("/nfts/getallnfts", nftController.getAllNfts);
 router.get("/nfts/getownersnfts/:ownerAddress", nftController.getOwnersNft);
 router.get("/nfts/getactivenfts/:active", nftController.getActiveNfts);
 router.get("/nfts/getnftbytitle/:title", nftController.getNftsByTitle);
+router.patch("/nfts/updatenft/:id", nftController.updateNftDetails);
 
 module.exports = router;

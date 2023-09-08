@@ -17,6 +17,7 @@ const ethers = require("ethers");
 
 const NftDetailPage = () => {
   const [data, setData] = useState({});
+  const params = useParams();
   async function fetchData() {
     try {
       await axios
@@ -34,9 +35,15 @@ const NftDetailPage = () => {
 
     fetchData();
   }, []);
-  const params = useParams();
 
-  const buyNft = async () => {};
+  const buyNft = async () => {
+    try {
+      await axios.patch(`http://localhost:5004/nfts//updatenft/${params.id}`, {
+        ownerAddress,
+        active,
+      });
+    } catch (error) {}
+  };
   return (
     <div className="detail-component">
       <div className="detail-img-cont">
