@@ -17,6 +17,7 @@ const ethers = require("ethers");
 
 const NftDetailPage = () => {
   const [data, setData] = useState({});
+  const [ownerAddress, setOwnerAddress] = useState();
   const params = useParams();
   async function fetchData() {
     try {
@@ -34,15 +35,18 @@ const NftDetailPage = () => {
     console.log("check", data);
 
     fetchData();
+    setOwnerAddress(localStorage.getItem("address"));
   }, []);
 
   const buyNft = async () => {
     try {
       await axios.patch(`http://localhost:5004/nfts//updatenft/${params.id}`, {
         ownerAddress,
-        active,
+        active: false,
       });
-    } catch (error) {}
+    } catch (error) {
+      console.log({ error });
+    }
   };
   return (
     <div className="detail-component">
@@ -57,7 +61,9 @@ const NftDetailPage = () => {
         <p>Token Id : {data.tokenId}</p>
         <p>Contract Address : {data.contractAddress}</p>
         {data.active ? (
-          <button className="detail-btn">Buy Nft</button>
+          <button className="detail-btn" onClick={buyNft}>
+            Buy Nft
+          </button>
         ) : (
           <p>Not Listed For Sale</p>
         )}
