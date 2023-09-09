@@ -7,14 +7,13 @@ import { useNavigate } from "react-router-dom";
 import CryptoCrafters from "../CryptoCrafters.json";
 import Marketplace from "../Marketplace.json";
 import { createWalletClient, custom, parseEther } from "viem";
-import { mainnet, sepolia } from "viem/chains";
+import { polygonMumbai } from "viem/chains";
 import {
   useContractWrite,
   usePrepareContractWrite,
   useContractRead,
 } from "wagmi";
-import { createPublicClient } from "viem";
-const ethers = require("ethers");
+import Navbar from "./Navbar";
 
 const MintNft = () => {
   const [title, setTitle] = useState();
@@ -24,41 +23,12 @@ const MintNft = () => {
   const [ownerAddress, setOwnerAddress] = useState(); // wallet address
   const [fileURL, setFileURL] = useState();
   const [message, updateMessage] = useState("");
-  const [tokenId, setTokenId] = useState("");
+  const [tokenId, setTokenId] = useState(2);
   const active = true;
-  const sellerAddress = "0x9f5fe62dCd7c09f77B5e6d8c41BEAc80Df56db0A";
-  const contractAddress = "0x6dA135287f373535E73c4e4CF9810bed6ceE6639";
+  const sellerAddress = "0xCDeD68e89f67d6262F82482C2710Ddd52492808a";
+  const contractAddress = "0xaDa04DEfc8ee70452faf8D4b85EBf6bEB24d40Bc";
 
-  const client = createWalletClient({
-    chain: sepolia,
-    transport: custom(window.ethereum),
-  });
-  // const publicClient = createPublicClient({
-  //   chain: sepolia,
-  //   // transport: http(),
-  // });
-
-  // const getTokenId = useContractRead({
-  //   address: CryptoCrafters.address,
-  //   abi: CryptoCrafters.abi,
-  //   functionName: "getTokenId",
-  // });
-  // const getTokenId = publicClient.readContract({
-  //   address: CryptoCrafters.address,
-  //   abi: CryptoCrafters.abi,
-  //   functionName: "getTokenId",
-  // });
-
-  // const wagmigotchiContract = {
-  //   address: "0xecb504d39723b0be0e3a9aa33d646642d1051ee1",
-  //   abi: CryptoCrafters.abi,
-  // };
-
-  const {
-    data: dataTokenId,
-    isError,
-    isLoading: isTokenIdLoading,
-  } = useContractRead({
+  const { data } = useContractRead({
     address: "0xaDa04DEfc8ee70452faf8D4b85EBf6bEB24d40Bc",
     abi: CryptoCrafters.abi,
     functionName: "getTokenId",
@@ -66,7 +36,8 @@ const MintNft = () => {
 
   useEffect(() => {
     setOwnerAddress(localStorage.getItem("address"));
-    console.log("token Id ", dataTokenId?.toString());
+    console.log("token Id ", data);
+    // console.log(isError);
   });
   // console.log("the tokenId is ", tokenId);
 
@@ -134,25 +105,25 @@ const MintNft = () => {
     approveMarketplaceContract
   );
 
-  const { config: mintConfig } = usePrepareContractWrite({
-    address: CryptoCrafters.address,
-    abi: CryptoCrafters.abi,
-    functionName: "safeMint",
-    args: [ownerAddress, ipfsHash],
-  });
-  const {
-    data,
-    isLoading,
-    isSuccess,
-    write: safeMint,
-  } = useContractWrite(mintConfig);
+  // const { config: mintConfig } = usePrepareContractWrite({
+  //   address: CryptoCrafters.address,
+  //   abi: CryptoCrafters.abi,
+  //   functionName: "safeMint",
+  //   args: [ownerAddress, ipfsHash],
+  // });
+  // const {
+  //   data:,
+  //   isLoading,
+  //   isSuccess,
+  //   write: safeMint,
+  // } = useContractWrite(mintConfig);
 
   const { config: listConfig } = usePrepareContractWrite({
     address: Marketplace.address,
     abi: Marketplace.abi,
     functionName: "listNft",
     value: parseEther("0.0025"),
-    args: [CryptoCrafters.address, tokenId, price],
+    args: [CryptoCrafters.address, 4, price],
   });
   const {
     data: listData,
@@ -173,8 +144,8 @@ const MintNft = () => {
         "Uploading NFT(takes 5 mins).. please dont click anything!"
       );
 
-      safeMint();
-      isSuccess ?? console.log("Nft minted");
+      // safeMint();
+      // isSuccess ?? console.log("Nft minted");
       setApproveNftContract();
       setApproveMarketplaceContract();
       try {
@@ -230,6 +201,7 @@ const MintNft = () => {
 
   return (
     <div className="mint-comp">
+      <Navbar />
       <h1>Mint Your Own Token</h1>
       <div className="mint-form">
         {/* <p>Your Token ID will be = {tokenId}</p> */}

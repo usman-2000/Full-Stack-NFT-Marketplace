@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "./Navbar";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import "../styles/nftdetailpage.css";
@@ -14,7 +13,6 @@ import {
   useContractRead,
 } from "wagmi";
 import { createPublicClient } from "viem";
-const ethers = require("ethers");
 
 const NftDetailPage = () => {
   const [data, setData] = useState({});
@@ -69,10 +67,14 @@ const NftDetailPage = () => {
     try {
       buyingNftFromContract();
       await axios
-        .patch(`http://localhost:5004/nfts/updatenft/${params._id}`, {
-          ownerAddress,
-          active: false,
-        })
+        .patch(
+          `http://localhost:5004/nfts/updatenft/${params._id}`,
+          { mode: "no-cors" },
+          {
+            ownerAddress,
+            active: false,
+          }
+        )
         .then((result) => console.log(result.data));
 
       navigate("/");
@@ -82,7 +84,6 @@ const NftDetailPage = () => {
   };
   return (
     <>
-      <Navbar />
       <div className="detail-component">
         <div className="detail-img-cont">
           <img src={data.ipfsHash} alt="NFT" />

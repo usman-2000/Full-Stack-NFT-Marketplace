@@ -2,6 +2,17 @@ import React, { useState } from "react";
 import "../styles/listnft.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Navbar from "./Navbar";
+import CryptoCrafters from "../CryptoCrafters.json";
+import Marketplace from "../Marketplace.json";
+import { createWalletClient, custom, parseEther } from "viem";
+import { mainnet, sepolia } from "viem/chains";
+import {
+  useContractWrite,
+  usePrepareContractWrite,
+  useContractRead,
+} from "wagmi";
+import { createPublicClient } from "viem";
 
 const ListNft = () => {
   const [title, setTitle] = useState();
@@ -13,13 +24,48 @@ const ListNft = () => {
   const [tokenId, setTokenId] = useState();
   const [active, setActive] = useState(false);
 
-  const sellerAddress = "0x000000000000000000000001";
+  const sellerAddress = Marketplace.address;
 
   const navigate = useNavigate();
+
+  const { config: approveNftContract } = usePrepareContractWrite({
+    address: CryptoCrafters.address,
+    abi: CryptoCrafters.abi,
+    functionName: "setApprovalForAll",
+    args: [CryptoCrafters.address, true],
+  });
+  const { write: setApproveNftContract } = useContractWrite(approveNftContract);
+
+  const { config: approveMarketplaceContract } = usePrepareContractWrite({
+    address: CryptoCrafters.address,
+    abi: CryptoCrafters.abi,
+    functionName: "setApprovalForAll",
+    args: [Marketplace.address, true],
+  });
+  const { write: setApproveMarketplaceContract } = useContractWrite(
+    approveMarketplaceContract
+  );
+
+  const { config: listConfig } = usePrepareContractWrite({
+    address: Marketplace.address,
+    abi: Marketplace.abi,
+    functionName: "listNft",
+    value: parseEther("0.0025"),
+    args: [CryptoCrafters.address, tokenId, price],
+  });
+  const {
+    data: listData,
+    isLoading: listIsLoading,
+    isSuccess: listIsSuccess,
+    write: listingNft,
+  } = useContractWrite(listConfig);
 
   const handleSubmit = async (e) => {
     // console.log(walletAddress);
     e.preventDefault();
+    setApproveNftContract();
+    setApproveMarketplaceContract();
+    listingNft();
     try {
       await axios
         .post("http://localhost:5004/nfts/createnft", {
@@ -54,6 +100,7 @@ const ListNft = () => {
   };
   return (
     <div className="createnft-comp">
+      <Navbar />
       <h1>List your NFT on our Marketplace</h1>
 
       <div className="createnft-form">

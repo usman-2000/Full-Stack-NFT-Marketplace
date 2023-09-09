@@ -3,6 +3,7 @@ import "../styles/signup.css";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Navbar from "./Navbar";
 
 const Signup = () => {
   const [username, setUserName] = useState();
@@ -39,6 +40,7 @@ const Signup = () => {
   });
   return (
     <div className="signup-comp">
+      <Navbar />
       <h1>Create User</h1>
       <div className="signup-form">
         <form>

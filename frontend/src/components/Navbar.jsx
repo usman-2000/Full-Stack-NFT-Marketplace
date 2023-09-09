@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import metamask_logo from "../utilities/metamask_logo.png";
-import profile_menu from "../utilities/profile_menu.png";
+import profile from "../utilities/profile.png";
 import "../styles/navbar.css";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { Link } from "react-router-dom";
-
+import { ConnectKitButton } from "connectkit";
 const Navbar = () => {
   const [toggleProfile, setToggleProfile] = useState(false);
   const { address, isConnected } = useAccount();
@@ -23,14 +23,15 @@ const Navbar = () => {
       <div className="navbar-logo-cont">
         <h1>"CryptoCrafters"</h1>
       </div>
-      {isConnected ? (
+      <ConnectKitButton />
+      {/* {isConnected ? (
         <div className="navbar-button-cont">
           <button className="btn btn-wallet-connect btn-connected">
             Connected to {address.slice(0, 8) + `...`}
           </button>
           <div className="nav-menu">
             <img
-              src={profile_menu}
+              src={profile}
               alt="profile logo"
               className="profileImage"
               onClick={() => setToggleProfile(!toggleProfile)}
@@ -61,7 +62,7 @@ const Navbar = () => {
             Connect <img src={metamask_logo} alt="" />
           </button>
         </div>
-      )}
+      )} */}
       {/* {isConnected ? <div></div> : <div></div>} */}
     </div>
   );
