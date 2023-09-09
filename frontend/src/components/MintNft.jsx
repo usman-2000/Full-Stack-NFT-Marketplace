@@ -6,8 +6,14 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import CryptoCrafters from "../CryptoCrafters.json";
 import Marketplace from "../Marketplace.json";
-import { createWalletClient, custom, parseEther } from "viem";
 import { polygonMumbai } from "viem/chains";
+import {
+  createWalletClient,
+  custom,
+  parseEther,
+  createPublicClient,
+  http,
+} from "viem";
 import {
   useContractWrite,
   usePrepareContractWrite,
@@ -23,22 +29,42 @@ const MintNft = () => {
   const [ownerAddress, setOwnerAddress] = useState(); // wallet address
   const [fileURL, setFileURL] = useState();
   const [message, updateMessage] = useState("");
-  const [tokenId, setTokenId] = useState(2);
+  const [tokenId, setTokenId] = useState(null);
   const active = true;
   const sellerAddress = "0xCDeD68e89f67d6262F82482C2710Ddd52492808a";
   const contractAddress = "0xaDa04DEfc8ee70452faf8D4b85EBf6bEB24d40Bc";
 
-  const { data } = useContractRead({
-    address: "0xaDa04DEfc8ee70452faf8D4b85EBf6bEB24d40Bc",
-    abi: CryptoCrafters.abi,
-    functionName: "getTokenId",
+  // const { data } = useContractRead({
+  //   address: "0xaDa04DEfc8ee70452faf8D4b85EBf6bEB24d40Bc",
+  //   abi: CryptoCrafters.abi,
+  //   functionName: "getTokenId",
+  // });
+
+  const client = createPublicClient({
+    chain: polygonMumbai,
+    transport: http(),
   });
 
+  async function fetchData() {
+    try {
+      const result = await client.readContract({
+        address: "0xaDa04DEfc8ee70452faf8D4b85EBf6bEB24d40Bc",
+        abi: CryptoCrafters.abi,
+        functionName: "_tokenIdCounter",
+      });
+      setTokenId(result); // Update the state with the fetched data
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }
+
+  console.log("token Id ", tokenId);
   useEffect(() => {
     setOwnerAddress(localStorage.getItem("address"));
-    console.log("token Id ", data);
+
     // console.log(isError);
   });
+  console.log("token Id ", tokenId);
   // console.log("the tokenId is ", tokenId);
 
   const navigate = useNavigate();
@@ -248,9 +274,11 @@ const MintNft = () => {
           <button type="submit" className="btn list-button" onClick={listNFT}>
             Mint and List
           </button>
+
           {/* </Link> */}
         </form>
       </div>
+      <button onClick={fetchData}>Call</button>
     </div>
   );
 };
