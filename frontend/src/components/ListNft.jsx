@@ -6,13 +6,8 @@ import Navbar from "./Navbar";
 import CryptoCrafters from "../CryptoCrafters.json";
 import Marketplace from "../Marketplace.json";
 import { createWalletClient, custom, parseEther } from "viem";
-import { mainnet, sepolia } from "viem/chains";
-import {
-  useContractWrite,
-  usePrepareContractWrite,
-  useContractRead,
-} from "wagmi";
-import { createPublicClient } from "viem";
+import { mainnet, sepolia, polygonMumbai } from "viem/chains";
+import { useContractWrite, usePrepareContractWrite } from "wagmi";
 
 const ListNft = () => {
   const [title, setTitle] = useState();
@@ -28,62 +23,64 @@ const ListNft = () => {
 
   const navigate = useNavigate();
 
-  const { config: approveNftContract } = usePrepareContractWrite({
-    address: CryptoCrafters.address,
-    abi: CryptoCrafters.abi,
-    functionName: "setApprovalForAll",
-    args: [CryptoCrafters.address, true],
-  });
-  const { write: setApproveNftContract } = useContractWrite(approveNftContract);
+  // const { config: approveNftContract } = usePrepareContractWrite({
+  //   address: CryptoCrafters.address,
+  //   abi: CryptoCrafters.abi,
+  //   functionName: "setApprovalForAll",
+  //   args: [CryptoCrafters.address, true],
+  // });
+  // const { write: setApproveNftContract } = useContractWrite(approveNftContract);
 
-  const { config: approveMarketplaceContract } = usePrepareContractWrite({
-    address: CryptoCrafters.address,
-    abi: CryptoCrafters.abi,
-    functionName: "setApprovalForAll",
-    args: [Marketplace.address, true],
-  });
-  const { write: setApproveMarketplaceContract } = useContractWrite(
-    approveMarketplaceContract
-  );
+  // const { config: approveMarketplaceContract } = usePrepareContractWrite({
+  //   address: CryptoCrafters.address,
+  //   abi: CryptoCrafters.abi,
+  //   functionName: "setApprovalForAll",
+  //   args: [Marketplace.address, true],
+  // });
+  // const { write: setApproveMarketplaceContract } = useContractWrite(
+  //   approveMarketplaceContract
+  // );
 
-  const { config: listConfig } = usePrepareContractWrite({
-    address: Marketplace.address,
+  const { config } = usePrepareContractWrite({
+    address: "0xCDeD68e89f67d6262F82482C2710Ddd52492808a",
     abi: Marketplace.abi,
     functionName: "listNft",
     value: parseEther("0.0025"),
-    args: [CryptoCrafters.address, tokenId, price],
+    args: ["0xCDeD68e89f67d6262F82482C2710Ddd52492808a", 1, 1],
   });
   const {
     data: listData,
     isLoading: listIsLoading,
     isSuccess: listIsSuccess,
     write: listingNft,
-  } = useContractWrite(listConfig);
+  } = useContractWrite(config);
 
   const handleSubmit = async (e) => {
     // console.log(walletAddress);
     e.preventDefault();
-    setApproveNftContract();
-    setApproveMarketplaceContract();
+    // setApproveNftContract();
+    // setApproveMarketplaceContract();
     listingNft();
+    console.log("list data is :", listData);
     try {
-      await axios
-        .post("http://localhost:5004/nfts/createnft", {
-          title,
-          price,
-          description,
-          ipfsHash,
-          ownerAddress,
-          contractAddress,
-          sellerAddress,
-          tokenId,
-          active,
-        })
-        .then((result) => console.log(result));
-      navigate("/");
+      //   await axios
+      //     .post("http://localhost:5004/nfts/createnft", {
+      //       title,
+      //       price,
+      //       description,
+      //       ipfsHash,
+      //       ownerAddress,
+      //       contractAddress,
+      //       sellerAddress,
+      //       tokenId,
+      //       active,
+      //     })
+      //     .then((result) => console.log(result));
+      //   navigate("/");
     } catch (error) {
       console.log(error);
       alert(error.response.data.error);
+      // alert(error);
     }
 
     console.log(
@@ -164,11 +161,9 @@ const ListNft = () => {
             <label htmlFor="">Active for listing?</label>
           </div>
 
-          {/* <Link to="/"> */}
           <button type="submit" className="btn" onClick={handleSubmit}>
             Submit
           </button>
-          {/* </Link> */}
         </form>
       </div>
     </div>

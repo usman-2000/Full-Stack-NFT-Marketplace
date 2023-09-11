@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../styles/mynfts";
+import "../styles/mynfts.css";
 import "../styles/nftshowcaselist.css";
 
 import { Link } from "react-router-dom";
@@ -13,7 +13,7 @@ const MyNfts = () => {
   async function fetchData() {
     try {
       await axios
-        .get(`http://localhost:5004/nfts/getownersnfts/${ownerAddress}`)
+        .get(`http://localhost:5004/nfts/getownersnfts/${params.ownerAddress}`)
         .then((res) => {
           console.log("Res", res.data);
           setData(res.data);
@@ -24,7 +24,7 @@ const MyNfts = () => {
   }
 
   useEffect(() => {
-    setOwnerAddress(localStorage.getItem("address"));
+    // setOwnerAddress(localStorage.getItem("address"));
     console.log("check", data);
     // if (data.length === 0) {
     fetchData();

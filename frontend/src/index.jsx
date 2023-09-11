@@ -5,14 +5,15 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 import { infuraProvider } from "wagmi/providers/infura";
+import { alchemyProvider } from "wagmi/providers/alchemy";
 import { Chain, WagmiConfig, configureChains, createConfig } from "wagmi";
 import { ConnectKitProvider, getDefaultConfig } from "connectkit";
-import { sepolia } from "wagmi/chains";
-const supportedChains = [sepolia];
+import { polygonMumbai } from "wagmi/chains";
+const supportedChains = [polygonMumbai];
 const { webSocketPublicClient, publicClient, chains } = configureChains(
   supportedChains,
   [
-    infuraProvider({ apiKey: "e1689fc2aab54b22b47bb44605ea5f2c" }),
+    alchemyProvider({ apiKey: "GNcwwQapYYPCVYzdNODhNff-OtR8nlad" }),
     jsonRpcProvider({
       rpc: (chain) => {
         const supportedChain = supportedChains.find(
@@ -36,9 +37,8 @@ const config = createConfig(
     webSocketPublicClient,
     chains,
     // Required API Keys
-    infuraId: process.env.REACT_APP_PUBLIC_INFURA_ID, // or infuraId
-    walletConnectProjectId:
-      process.env.REACT_APP_PUBLIC_WALLETCONNECT_PROJECT_ID || "", // Assign an empty string if it's undefined
+    alchemyId: "GNcwwQapYYPCVYzdNODhNff-OtR8nlad", // or infuraId
+    walletConnectProjectId: "60048357e4d66600c5ff62d4c24f03c4", // Assign an empty string if it's undefined
     // Required
     appName: "TestApp",
   })

@@ -20,6 +20,7 @@ import {
   useContractRead,
 } from "wagmi";
 import Navbar from "./Navbar";
+import { ethers } from "ethers";
 
 const MintNft = () => {
   const [title, setTitle] = useState();
@@ -32,14 +33,7 @@ const MintNft = () => {
   const [tokenId, setTokenId] = useState(null);
   const active = true;
   const sellerAddress = "0xCDeD68e89f67d6262F82482C2710Ddd52492808a";
-  const contractAddress = "0xaDa04DEfc8ee70452faf8D4b85EBf6bEB24d40Bc";
-
-  // const { data } = useContractRead({
-  //   address: "0xaDa04DEfc8ee70452faf8D4b85EBf6bEB24d40Bc",
-  //   abi: CryptoCrafters.abi,
-  //   functionName: "getTokenId",
-  // });
-
+  const contractAddress = "0x07bc2329da3D5f73be6183Fae001045Ed4352757";
   const client = createPublicClient({
     chain: polygonMumbai,
     transport: http(),
@@ -48,24 +42,21 @@ const MintNft = () => {
   async function fetchData() {
     try {
       const result = await client.readContract({
-        address: "0xaDa04DEfc8ee70452faf8D4b85EBf6bEB24d40Bc",
+        address: "0x07bc2329da3D5f73be6183Fae001045Ed4352757",
         abi: CryptoCrafters.abi,
         functionName: "_tokenIdCounter",
       });
-      setTokenId(result); // Update the state with the fetched data
+      setTokenId(result.toString()); // Update the state with the fetched data
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   }
 
-  console.log("token Id ", tokenId);
+  console.log("token Id --- ", tokenId);
   useEffect(() => {
     setOwnerAddress(localStorage.getItem("address"));
-
-    // console.log(isError);
+    fetchData();
   });
-  console.log("token Id ", tokenId);
-  // console.log("the tokenId is ", tokenId);
 
   const navigate = useNavigate();
 
@@ -131,25 +122,25 @@ const MintNft = () => {
     approveMarketplaceContract
   );
 
-  // const { config: mintConfig } = usePrepareContractWrite({
-  //   address: CryptoCrafters.address,
-  //   abi: CryptoCrafters.abi,
-  //   functionName: "safeMint",
-  //   args: [ownerAddress, ipfsHash],
-  // });
-  // const {
-  //   data:,
-  //   isLoading,
-  //   isSuccess,
-  //   write: safeMint,
-  // } = useContractWrite(mintConfig);
+  const { config: mintConfig } = usePrepareContractWrite({
+    address: "0x07bc2329da3D5f73be6183Fae001045Ed4352757",
+    abi: CryptoCrafters.abi,
+    functionName: "safeMint",
+    args: [ownerAddress, ipfsHash],
+  });
+  const {
+    data: mintData,
+    isLoading,
+    isSuccess,
+    write: safeMintNft,
+  } = useContractWrite(mintConfig);
 
   const { config: listConfig } = usePrepareContractWrite({
-    address: Marketplace.address,
+    address: "0xcded68e89f67d6262f82482c2710ddd52492808a",
     abi: Marketplace.abi,
     functionName: "listNft",
     value: parseEther("0.0025"),
-    args: [CryptoCrafters.address, 4, price],
+    args: [CryptoCrafters.address, tokenId, price],
   });
   const {
     data: listData,
@@ -170,15 +161,16 @@ const MintNft = () => {
         "Uploading NFT(takes 5 mins).. please dont click anything!"
       );
 
-      // safeMint();
-      // isSuccess ?? console.log("Nft minted");
-      setApproveNftContract();
-      setApproveMarketplaceContract();
       try {
-        listingNft();
+        safeMintNft();
       } catch (error) {
         console.log(error);
       }
+      isSuccess ? console.log("Nft minted") : console.log("");
+      setApproveNftContract();
+      setApproveMarketplaceContract();
+
+      listingNft();
 
       listIsSuccess
         ? console.log("Nft listed to marketplace")
@@ -209,13 +201,10 @@ const MintNft = () => {
       }
 
       alert("Successfully listed your NFT!");
-      // enableButton();
       updateMessage("");
-      // updateFormParams({ name: '', description: '', price: ''});
       setTitle("");
       setDescription("");
       setPrice("");
-      setTokenId(tokenId + 1);
 
       window.location.replace("/");
     } catch (e) {
@@ -223,14 +212,12 @@ const MintNft = () => {
     }
   }
 
-  console.log("Working", process.env);
-
   return (
     <div className="mint-comp">
       <Navbar />
       <h1>Mint Your Own Token</h1>
       <div className="mint-form">
-        {/* <p>Your Token ID will be = {tokenId}</p> */}
+        <p>Your Token ID will be = {tokenId}</p>
         <p>The Contract address is :</p>
         <p>{contractAddress}</p>
         <p>Seller Address is : </p>
@@ -259,26 +246,15 @@ const MintNft = () => {
             onChange={(e) => setDescription(e.target.value)}
             required={true}
           />
-          {/* <label htmlFor="">Wallet Address</label>
-          <input
-            type="text"
-            placeholder="Enter your wallet address"
-            onChange={(e) => setOwnerAddress(e.target.value)}
-            required={true}
-          /> */}
 
           <label>Upload Image</label>
           <input type={"file"} onChange={OnChangeFile}></input>
-          {/* <Link to="/"> */}
           <p>{message}</p>
           <button type="submit" className="btn list-button" onClick={listNFT}>
             Mint and List
           </button>
-
-          {/* </Link> */}
         </form>
       </div>
-      <button onClick={fetchData}>Call</button>
     </div>
   );
 };

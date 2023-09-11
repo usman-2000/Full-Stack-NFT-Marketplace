@@ -15,7 +15,7 @@ function App() {
         <Route path="createuser" element={<Signup />}></Route>
         <Route path="listnft" element={<ListNft />}></Route>
         <Route path="mintnft" element={<MintNft />}></Route>
-        <Route path="mynfts" element={<MyNfts />}></Route>
+        <Route path="mynfts/:ownerAddress" element={<MyNfts />}></Route>
       </Routes>
     </BrowserRouter>
   );
