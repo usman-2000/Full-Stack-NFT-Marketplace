@@ -23,30 +23,31 @@ const ListNft = () => {
 
   const navigate = useNavigate();
 
-  // const { config: approveNftContract } = usePrepareContractWrite({
-  //   address: CryptoCrafters.address,
-  //   abi: CryptoCrafters.abi,
-  //   functionName: "setApprovalForAll",
-  //   args: [CryptoCrafters.address, true],
-  // });
-  // const { write: setApproveNftContract } = useContractWrite(approveNftContract);
+  const { config: approveNftContract } = usePrepareContractWrite({
+    address: CryptoCrafters.address,
+    abi: CryptoCrafters.abi,
+    functionName: "setApprovalForAll",
+    args: [CryptoCrafters.address, true],
+  });
+  const { write: setApproveNftContract } = useContractWrite(approveNftContract);
 
-  // const { config: approveMarketplaceContract } = usePrepareContractWrite({
-  //   address: CryptoCrafters.address,
-  //   abi: CryptoCrafters.abi,
-  //   functionName: "setApprovalForAll",
-  //   args: [Marketplace.address, true],
-  // });
-  // const { write: setApproveMarketplaceContract } = useContractWrite(
-  //   approveMarketplaceContract
-  // );
+  const { config: approveMarketplaceContract } = usePrepareContractWrite({
+    address: CryptoCrafters.address,
+    abi: CryptoCrafters.abi,
+    functionName: "setApprovalForAll",
+    args: [Marketplace.address, true],
+  });
+  const { write: setApproveMarketplaceContract } = useContractWrite(
+    approveMarketplaceContract
+  );
 
   const { config } = usePrepareContractWrite({
     address: "0xCDeD68e89f67d6262F82482C2710Ddd52492808a",
     abi: Marketplace.abi,
     functionName: "listNft",
     value: parseEther("0.0025"),
-    args: ["0xCDeD68e89f67d6262F82482C2710Ddd52492808a", 1, 1],
+    // args: ["0x07bc2329da3d5f73be6183fae001045ed4352757", 2, 1],
+    args: [contractAddress, tokenId, parseEther(price)],
   });
   const {
     data: listData,
@@ -58,25 +59,25 @@ const ListNft = () => {
   const handleSubmit = async (e) => {
     // console.log(walletAddress);
     e.preventDefault();
-    // setApproveNftContract();
-    // setApproveMarketplaceContract();
+    setApproveNftContract();
+    setApproveMarketplaceContract();
     listingNft();
     console.log("list data is :", listData);
     try {
-      //   await axios
-      //     .post("http://localhost:5004/nfts/createnft", {
-      //       title,
-      //       price,
-      //       description,
-      //       ipfsHash,
-      //       ownerAddress,
-      //       contractAddress,
-      //       sellerAddress,
-      //       tokenId,
-      //       active,
-      //     })
-      //     .then((result) => console.log(result));
-      //   navigate("/");
+      await axios
+        .post("http://localhost:5004/nfts/createnft", {
+          title,
+          price,
+          description,
+          ipfsHash,
+          ownerAddress,
+          contractAddress,
+          sellerAddress,
+          tokenId,
+          active,
+        })
+        .then((result) => console.log(result));
+      navigate("/");
     } catch (error) {
       console.log(error);
       alert(error.response.data.error);

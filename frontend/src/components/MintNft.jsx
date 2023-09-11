@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import CryptoCrafters from "../CryptoCrafters.json";
 import Marketplace from "../Marketplace.json";
 import { polygonMumbai } from "viem/chains";
+// import { BigInt } from "wagmi";
 import {
   createWalletClient,
   custom,
@@ -24,13 +25,14 @@ import { ethers } from "ethers";
 
 const MintNft = () => {
   const [title, setTitle] = useState();
-  const [price, setPrice] = useState();
+  const [price, setPrice] = useState("");
   const [description, setDescription] = useState();
   const [ipfsHash, setIpfsHash] = useState();
   const [ownerAddress, setOwnerAddress] = useState(); // wallet address
   const [fileURL, setFileURL] = useState();
   const [message, updateMessage] = useState("");
   const [tokenId, setTokenId] = useState(null);
+  const [tokenIdForListing, setTokenIdForListing] = useState(null);
   const active = true;
   const sellerAddress = "0xCDeD68e89f67d6262F82482C2710Ddd52492808a";
   const contractAddress = "0x07bc2329da3D5f73be6183Fae001045Ed4352757";
@@ -53,9 +55,15 @@ const MintNft = () => {
   }
 
   console.log("token Id --- ", tokenId);
+  console.log("token Id for listing --- ", tokenIdForListing);
+  console.log("Price ", price);
+  // const price2 = ethers.utils.parseUnits(price, "ether");
+  // console.log("sss", price2);
+
   useEffect(() => {
     setOwnerAddress(localStorage.getItem("address"));
     fetchData();
+    setTokenIdForListing(tokenId - 1);
   });
 
   const navigate = useNavigate();
@@ -140,7 +148,11 @@ const MintNft = () => {
     abi: Marketplace.abi,
     functionName: "listNft",
     value: parseEther("0.0025"),
-    args: [CryptoCrafters.address, tokenId, price],
+    args: [
+      "0x07bc2329da3D5f73be6183Fae001045Ed4352757",
+      tokenIdForListing,
+      parseEther(price),
+    ],
   });
   const {
     data: listData,
@@ -170,7 +182,7 @@ const MintNft = () => {
       setApproveNftContract();
       setApproveMarketplaceContract();
 
-      listingNft();
+      // listingNft();
 
       listIsSuccess
         ? console.log("Nft listed to marketplace")
@@ -179,36 +191,32 @@ const MintNft = () => {
       updateMessage(
         "Uploading NFT(takes 5 mins).. please dont click anything!"
       );
-
-      try {
-        await axios
-          .post("http://localhost:5004/nfts/createnft", {
-            title,
-            price,
-            description,
-            ipfsHash,
-            ownerAddress,
-            contractAddress,
-            sellerAddress,
-            tokenId,
-            active,
-          })
-          .then((result) => console.log(result));
-        navigate("/");
-      } catch (error) {
-        console.log(error);
-        alert(error.response.data.error);
-      }
-
-      alert("Successfully listed your NFT!");
-      updateMessage("");
-      setTitle("");
-      setDescription("");
-      setPrice("");
-
-      window.location.replace("/");
     } catch (e) {
       alert("Upload error --:--> " + e);
+    }
+  }
+
+  async function listingnft(e) {
+    e.preventDefault();
+    try {
+      listingNft();
+
+      await axios
+        .post("http://localhost:5004/nfts/createnft", {
+          title,
+          price,
+          description,
+          ipfsHash,
+          ownerAddress,
+          contractAddress,
+          sellerAddress,
+          tokenId,
+          active,
+        })
+        .then((result) => console.log(result));
+      navigate("/");
+    } catch (error) {
+      alert("Error--", error.data);
     }
   }
 
@@ -234,7 +242,6 @@ const MintNft = () => {
           />
           <label htmlFor="">Price (in ETH)</label>
           <input
-            type="number"
             placeholder="Min 0.01 ETH"
             onChange={(e) => setPrice(e.target.value)}
             required={true}
@@ -251,7 +258,15 @@ const MintNft = () => {
           <input type={"file"} onChange={OnChangeFile}></input>
           <p>{message}</p>
           <button type="submit" className="btn list-button" onClick={listNFT}>
-            Mint and List
+            Mint
+          </button>
+
+          <button
+            type="submit"
+            className="btn list-button"
+            onClick={listingnft}
+          >
+            List
           </button>
         </form>
       </div>
