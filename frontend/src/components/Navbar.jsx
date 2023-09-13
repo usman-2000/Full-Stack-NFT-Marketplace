@@ -6,9 +6,11 @@ import { Link } from "react-router-dom";
 import { ConnectKitButton } from "connectkit";
 import axios from "axios";
 import Logo from "../utilities/logoImage.png";
+import Profile from "./Profile";
 const Navbar = () => {
   const { address, isConnected } = useAccount();
   const [data, setData] = useState({});
+  const [openProfile, setOpenProfile] = useState(false);
 
   const fetchUser = async () => {
     try {
@@ -42,7 +44,12 @@ const Navbar = () => {
         <ul>
           {isConnected ? (
             data ? (
-              <li>Profile</li>
+              <li
+                style={{ cursor: "pointer" }}
+                onClick={() => setOpenProfile(!openProfile)}
+              >
+                Profile
+              </li>
             ) : (
               <li>
                 <Link to={"/createuser"}>Create User</Link>
@@ -60,6 +67,7 @@ const Navbar = () => {
           </li>
         </ul>
       </div>
+      {openProfile && <Profile />}
     </div>
 
     // <></>

@@ -8,6 +8,13 @@
   /* color: white; */
 }
 
+.createnft-comp h1 {
+  margin-top: 1rem;
+
+  font-size: 2.1rem;
+  font-weight: 600;
+}
+
 .createnft-form form {
   display: flex;
   flex-direction: column;
@@ -18,8 +25,18 @@
 
 .createnft-form form input {
   font-size: 1.1rem;
-  height: 20px;
+  height: 40px;
   padding: 10px;
+  /* outline-color: rgb(0, 0, 0);
+  outline-width: 0.1px;
+  outline-style: dashed; */
+}
+.createnft-form form input:focus {
+  outline-style: solid;
+}
+
+.checkbox {
+  outline-width: 0px;
 }
 .createnft-form form label {
   font-size: 1.1rem;
@@ -29,4 +46,8 @@
 .checkbox-cont {
   display: flex;
   flex-direction: row;
+}
+
+.checkbox-cont input {
+  outline-width: 0px;
 }

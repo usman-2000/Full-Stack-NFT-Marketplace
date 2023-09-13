@@ -27,6 +27,10 @@
   outline-width: 0.1px;
   outline-style: dashed;
 }
+
+.signup-form form input:focus {
+  outline-style: solid;
+}
 .signup-form form label {
   font-size: 1.1rem;
   font-weight: 600;

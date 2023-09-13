@@ -47,7 +47,7 @@ const ListNft = () => {
     functionName: "listNft",
     value: parseEther("0.0025"),
     // args: ["0x07bc2329da3d5f73be6183fae001045ed4352757", 2, 1],
-    args: [contractAddress, tokenId, parseEther(price)],
+    args: [contractAddress, tokenId, price],
   });
   const {
     data: listData,
@@ -155,6 +155,7 @@ const ListNft = () => {
 
           <div className="checkbox-cont">
             <input
+              className="checkbox"
               type="checkbox"
               onChange={(e) => setActive(e.target.checked)}
               required={true}
