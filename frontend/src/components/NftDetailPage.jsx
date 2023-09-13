@@ -88,27 +88,50 @@ const NftDetailPage = () => {
   };
   return (
     <>
-      <div className="detail-component">
-        <div className="detail-img-cont">
-          <img src={data.ipfsHash} alt="NFT" />
+      <section className="text-gray-700 body-font overflow-hidden bg-white">
+        <div className="container px-5 py-24 mx-auto">
+          <div className="lg:w-4/5 mx-auto flex flex-wrap">
+            <img
+              alt="ecommerce"
+              className="lg:w-1/2 w-full object-cover object-center rounded border border-gray-200"
+              src={data.ipfsHash}
+            />
+            <div className="lg:w-1/2 w-full lg:pl-10 lg:py-6 mt-6 lg:mt-0">
+              <h1 className="text-gray-900 text-3xl title-font font-medium mb-1">
+                {data.title}
+              </h1>
+
+              <p className="leading-relaxed">{data.description}</p>
+              <p className="leading-relaxed">
+                Owner Address: {data.ownerAddress}
+              </p>
+              <p className="leading-relaxed">
+                Contract Address : {data.contractAddress}
+              </p>
+              <p className="leading-relaxed">Token Id : {data.tokenId}</p>
+              {/* <p className="leading-relaxed">
+                  IpfsHash : {data.ipfsHash.slice(0, 36)}...
+                </p> */}
+
+              <div className="flex">
+                <span className="title-font font-medium text-2xl text-gray-900">
+                  Eth {data.price}
+                </span>
+                {data.ownerAddress === localStorage.getItem("address") ? (
+                  ""
+                ) : (
+                  <button
+                    className="flex ml-auto text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded"
+                    onClick={buyNft}
+                  >
+                    Buy Nft
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="detail-info-cont">
-          <h1>{data.title}</h1>
-          <p>{data.description}</p>
-          <p>Price : {data.price}</p>
-          <p>Owner : {data.ownerAddress}</p>
-          <p>Token Id : {data.tokenId}</p>
-          <p>Contract Address : {data.contractAddress}</p>
-          {/* <p>IPFS Hash : {data.ipfsHash}</p> */}
-          {data.active ? (
-            <button className="detail-btn" onClick={buyNft}>
-              Buy Nft
-            </button>
-          ) : (
-            <p>Not Listed For Sale</p>
-          )}
-        </div>
-      </div>
+      </section>
     </>
   );
 };

@@ -6,16 +6,9 @@
   justify-content: space-between;
 }
 
-.navbar-logo-cont h1 {
-  /* background: -webkit-linear-gradient(
-    #010106c0,
-    rgb(16, 16, 25),
-    rgb(202, 202, 209)
-  ); */
-  /* -webkit-background-clip: text; */
-  /* -webkit-text-fill-color: transparent; */
-  font-size: 1.8rem;
-  color: black;
+.navbar-logo-cont img {
+  height: 40px;
+  margin: 10px;
 }
 
 .navbar-menu-cont ul {
@@ -26,4 +19,8 @@
 .navbar-menu-cont ul li {
   padding: 10px;
   font-size: 1.2rem;
+  font-weight: 600;
+}
+.navbar-menu-cont ul li:hover {
+  color: rgb(68, 64, 64);
 }

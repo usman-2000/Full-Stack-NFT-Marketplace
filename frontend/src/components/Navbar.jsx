@@ -4,25 +4,53 @@ import { useAccount } from "wagmi";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { Link } from "react-router-dom";
 import { ConnectKitButton } from "connectkit";
+import axios from "axios";
+import Logo from "../utilities/logoImage.png";
 const Navbar = () => {
   const { address, isConnected } = useAccount();
+  const [data, setData] = useState({});
+
+  const fetchUser = async () => {
+    try {
+      axios
+        .get(`http://localhost:5004/users/getsingleuser/${address}`)
+        .then((res) => {
+          console.log(res);
+          setData(res.data);
+          res.data
+            ? console.log(res)
+            : alert("You can create your profile by clicking on create user");
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     localStorage.setItem("address", address);
-  }, [isConnected]);
+    fetchUser();
+  }, [address]);
 
   return (
     <div className="Navbar-comp">
       <div className="navbar-logo-cont">
-        <h1>
-          <Link to={"/"}>"!NightMares!"</Link>
-        </h1>
+        <Link to={"/"}>
+          <img src={Logo} alt="" />
+        </Link>
       </div>
       <div className="navbar-menu-cont">
         <ul>
-          <li>
-            <Link to={"/createuser"}>Create User</Link>
-          </li>
+          {isConnected ? (
+            data ? (
+              <li>Profile</li>
+            ) : (
+              <li>
+                <Link to={"/createuser"}>Create User</Link>
+              </li>
+            )
+          ) : (
+            ""
+          )}
 
           <li>
             <Link to={`/mynfts/${address}`}>My Nfts</Link>
@@ -33,6 +61,8 @@ const Navbar = () => {
         </ul>
       </div>
     </div>
+
+    // <></>
   );
 };
 

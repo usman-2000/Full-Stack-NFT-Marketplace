@@ -5,6 +5,12 @@
   align-items: center;
   flex-direction: column;
   margin-top: 2rem;
+  margin-top: 2rem;
+}
+
+.nftshowcase-cont h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
 }
 
 .nft-card-cont {
@@ -16,21 +22,13 @@
 }
 
 .nft-card {
-  width: 250px;
-  height: 330px;
-  border: 1px solid gray;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px 10px 20px 10px;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  border: 1px dotted rgb(188, 186, 186);
+  margin-top: 20px;
 }
 
 .img-cont {
-  width: 190px;
-  height: 190px;
+  /* width: 190px; */
+  height: 210px;
 }
 .img-cont img {
   width: 100%;
