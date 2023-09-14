@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import CryptoCrafters from "../CryptoCrafters.json";
 import Marketplace from "../Marketplace.json";
 import { polygonMumbai } from "viem/chains";
+import { useWaitForTransaction } from "wagmi";
 // import { BigInt } from "wagmi";
 import {
   createWalletClient,
@@ -24,6 +25,10 @@ import Navbar from "./Navbar";
 import { ethers } from "ethers";
 
 const MintNft = () => {
+  const [formValid, setFormValid] = useState(false);
+  const [imageUploaded, setImageUploaded] = useState(false);
+  const [imageloader, setImageLoader] = useState(false);
+  const [mintingComplete, setMintingComplete] = useState(false);
   const [title, setTitle] = useState();
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState();
@@ -71,20 +76,26 @@ const MintNft = () => {
   async function OnChangeFile(e) {
     var file = e.target.files[0];
     try {
-      //upload the file to IPFS
-
-      updateMessage("Uploading image.. please dont click anything!");
+      setImageLoader(true);
+      updateMessage("Uploading image.. please don't click anything!");
       const response = await uploadFileToIPFS(file);
       if (response.success === true) {
+        setImageLoader(false);
         updateMessage("");
         console.log("Uploaded image to Pinata: ", response.pinataURL);
         setIpfsHash(response.pinataURL);
         setFileURL(response.pinataURL);
+        setImageUploaded(true); // Image is uploaded
       }
     } catch (e) {
       console.log("Error during file upload", e);
     }
   }
+
+  useEffect(() => {
+    const isFormValid = title && description && price && fileURL;
+    setFormValid(isFormValid);
+  }, [title, description, price, fileURL]);
 
   async function uploadMetadataToIPFS() {
     //Make sure that none of the fields are empty
@@ -161,39 +172,45 @@ const MintNft = () => {
     write: listingNft,
   } = useContractWrite(listConfig);
 
+  // Use useWaitForTransaction to wait for the transaction to complete
+  const { isLoading: mintingIsLoading, isSuccess: mintingIsSuccess } =
+    useWaitForTransaction({
+      hash: mintData?.hash, // Assuming mintData contains the transaction hash
+    });
+
   async function listNFT(e) {
     e.preventDefault();
 
-    //Upload data to IPFS
     try {
-      const metadataURL = await uploadMetadataToIPFS();
-      if (metadataURL === -1) return;
-
-      updateMessage(
-        "Uploading NFT(takes 5 mins).. please dont click anything!"
-      );
-
+      // Upload data to IPFS
       try {
-        safeMintNft();
-      } catch (error) {
-        console.log(error);
+        const metadataURL = await uploadMetadataToIPFS();
+        if (metadataURL === -1) return;
+
+        updateMessage(
+          "Uploading NFT (takes 5 mins).. please don't click anything!"
+        );
+
+        try {
+          safeMintNft(); // Initiate the minting transaction
+        } catch (error) {
+          console.log(error);
+        }
+
+        if (mintingIsSuccess) {
+          setMintingComplete(true);
+          setApproveNftContract();
+          setApproveMarketplaceContract();
+          updateMessage("Successfully minted!");
+          alert("Token Minted Successfully");
+        } else {
+          console.log("Minting transaction is still pending or failed.");
+        }
+      } catch (e) {
+        alert("Upload error --:--> " + e);
       }
-      isSuccess ? console.log("Nft minted") : console.log("");
-      setApproveNftContract();
-      setApproveMarketplaceContract();
-
-      updateMessage("Successfully minted!");
-      // listingNft();
-
-      // listIsSuccess
-      //   ? console.log("Nft listed to marketplace")
-      //   : console.log("");
-
-      // updateMessage(
-      //   "Uploading NFT(takes 5 mins).. please dont click anything!"
-      // );
-    } catch (e) {
-      alert("Upload error --:--> " + e);
+    } catch (error) {
+      alert("Error--" + error);
     }
   }
 
@@ -261,13 +278,27 @@ const MintNft = () => {
           <label>Upload Image</label>
           <input type={"file"} onChange={OnChangeFile}></input>
           <p>{message}</p>
-          <button type="submit" className="btn list-button" onClick={listNFT}>
-            Mint
+          <button
+            disabled={
+              imageloader ||
+              !formValid ||
+              !imageUploaded ||
+              mintingComplete ||
+              mintingIsLoading
+            }
+            type="submit"
+            className="btn list-button disabled:bg-slate-400"
+            onClick={listNFT}
+          >
+            {mintingIsLoading ? "Wait minting...." : " mint"}
           </button>
 
           <button
+            disabled={
+              imageloader || !formValid || !imageUploaded || !mintingComplete
+            }
             type="submit"
-            className="btn list-button"
+            className="btn list-button disabled:bg-slate-400"
             onClick={listingnft}
           >
             List

@@ -153,16 +153,6 @@ const ListNft = () => {
             required={true}
           />
 
-          <div className="checkbox-cont">
-            <input
-              className="checkbox"
-              type="checkbox"
-              onChange={(e) => setActive(e.target.checked)}
-              required={true}
-            />
-            <label htmlFor="">Active for listing?</label>
-          </div>
-
           <button type="submit" className="btn" onClick={handleSubmit}>
             Submit
           </button>
