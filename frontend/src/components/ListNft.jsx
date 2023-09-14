@@ -11,7 +11,7 @@ import { useContractWrite, usePrepareContractWrite } from "wagmi";
 
 const ListNft = () => {
   const [title, setTitle] = useState();
-  const [price, setPrice] = useState();
+  const [price, setPrice] = useState("");
   const [description, setDescription] = useState();
   const [ipfsHash, setIpfsHash] = useState();
   const [ownerAddress, setOwnerAddress] = useState();
@@ -47,7 +47,7 @@ const ListNft = () => {
     functionName: "listNft",
     value: parseEther("0.0025"),
     // args: ["0x07bc2329da3d5f73be6183fae001045ed4352757", 2, 1],
-    args: [contractAddress, tokenId, price],
+    args: [contractAddress, tokenId, parseEther(price)],
   });
   const {
     data: listData,

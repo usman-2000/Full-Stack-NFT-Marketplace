@@ -7,10 +7,12 @@ import { ConnectKitButton } from "connectkit";
 import axios from "axios";
 import Logo from "../utilities/logoImage.png";
 import Profile from "./Profile";
+import CreateProfileModal from "./createProfileModal";
 const Navbar = () => {
   const { address, isConnected } = useAccount();
   const [data, setData] = useState({});
   const [openProfile, setOpenProfile] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
 
   const fetchUser = async () => {
     try {
@@ -19,9 +21,12 @@ const Navbar = () => {
         .then((res) => {
           console.log(res);
           setData(res.data);
-          res.data
-            ? console.log(res)
-            : alert("You can create your profile by clicking on create user");
+          // res.data ? console.log(res) : setOpenModal(!openModal);
+          isConnected
+            ? res.data
+              ? console.log(res)
+              : setOpenModal(!openModal)
+            : setOpenModal(false);
         });
     } catch (error) {
       console.log(error);
@@ -51,8 +56,11 @@ const Navbar = () => {
                 Profile
               </li>
             ) : (
-              <li>
-                <Link to={"/createuser"}>Create User</Link>
+              <li
+                style={{ cursor: "pointer" }}
+                onClick={() => setOpenModal(!openModal)}
+              >
+                Create User
               </li>
             )
           ) : (
@@ -68,9 +76,8 @@ const Navbar = () => {
         </ul>
       </div>
       {openProfile && <Profile />}
+      {openModal && <CreateProfileModal toggleModal={setOpenModal} />}
     </div>
-
-    // <></>
   );
 };
 

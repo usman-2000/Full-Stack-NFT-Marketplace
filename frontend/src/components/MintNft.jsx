@@ -182,15 +182,16 @@ const MintNft = () => {
       setApproveNftContract();
       setApproveMarketplaceContract();
 
+      updateMessage("Successfully minted!");
       // listingNft();
 
-      listIsSuccess
-        ? console.log("Nft listed to marketplace")
-        : console.log("");
+      // listIsSuccess
+      //   ? console.log("Nft listed to marketplace")
+      //   : console.log("");
 
-      updateMessage(
-        "Uploading NFT(takes 5 mins).. please dont click anything!"
-      );
+      // updateMessage(
+      //   "Uploading NFT(takes 5 mins).. please dont click anything!"
+      // );
     } catch (e) {
       alert("Upload error --:--> " + e);
     }
@@ -199,6 +200,9 @@ const MintNft = () => {
   async function listingnft(e) {
     e.preventDefault();
     try {
+      if (!isSuccess) {
+        throw new Error("Minting NFT is not complete.");
+      }
       listingNft();
 
       await axios
@@ -216,7 +220,7 @@ const MintNft = () => {
         .then((result) => console.log(result));
       navigate("/");
     } catch (error) {
-      alert("Error--", error.data);
+      alert("Error--", error);
     }
   }
 

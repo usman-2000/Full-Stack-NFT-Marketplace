@@ -33,22 +33,16 @@ const MyNfts = () => {
   return (
     <div className="flex flex-col justify-center items-center w-[100vw]">
       <h1 className="main-heading">My Nfts</h1>
+      {data.length === 0 ? (
+        <div>
+          <h2>You do not own any nft!</h2>
+        </div>
+      ) : (
+        ""
+      )}
       <div className="nft-card-cont">
         {data.map((e, i) => {
           return (
-            // <div className="nft-card" key={i}>
-            //   <div className="img-cont">
-            //     <img src={e.ipfsHash} alt="Nfts image" />
-            //   </div>
-            //   <div className="detail-cont">
-            //     <h3>Name : {e.title}</h3>
-            //     <h3>Price : {e.price}</h3>
-            //     <Link to={`/${e._id}`}>
-            //       <button className="detail-btn">Detail</button>
-            //     </Link>
-            //   </div>
-            // </div>
-
             <>
               <div className="!z-5 relative flex flex-col rounded-[20px] max-w-[300px] bg-white bg-clip-border shadow-3xl shadow-shadow-500 flex flex-col w-full !p-4 3xl:p-![18px] bg-white undefined nft-card">
                 <div className="h-full w-full">
