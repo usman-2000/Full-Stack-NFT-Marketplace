@@ -56,12 +56,13 @@ const Navbar = () => {
                 Profile
               </li>
             ) : (
-              <li
-                style={{ cursor: "pointer" }}
-                onClick={() => setOpenModal(!openModal)}
-              >
-                Create User
-              </li>
+              // <li
+              //   style={{ cursor: "pointer" }}
+              //   onClick={() => setOpenModal(!openModal)}
+              // >
+              //   Create User
+              // </li>
+              ""
             )
           ) : (
             ""
@@ -76,7 +77,7 @@ const Navbar = () => {
         </ul>
       </div>
       {openProfile && <Profile />}
-      {openModal && <CreateProfileModal toggleModal={setOpenModal} />}
+      {openModal && <CreateProfileModal />}
     </div>
   );
 };

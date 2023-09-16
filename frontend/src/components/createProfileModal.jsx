@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import createuser from "../utilities/createuser.png";
 
-const CreateProfileModal = (props) => {
+const CreateProfileModal = () => {
   const [username, setUserName] = useState();
   const [email, setEmail] = useState();
   const [walletAddress, setWalletAddress] = useState();
@@ -85,12 +85,6 @@ const CreateProfileModal = (props) => {
                   </button>
                 </div>
               </form>
-              <button
-                className="mb-1.5 block w-[90px] text-center text-white bg-purple-400 hover:bg-purple-700 px-2 py-1.5 rounded-md"
-                onClick={() => props.toggleModal(false)}
-              >
-                Close
-              </button>
             </div>
           </div>
 

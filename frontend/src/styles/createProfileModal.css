@@ -47,7 +47,8 @@
 } */
 
 .modal {
-  position: absolute;
+  position: fixed;
+  z-index: 1;
   top: -2.6rem;
   right: 33rem;
   width: 310px;

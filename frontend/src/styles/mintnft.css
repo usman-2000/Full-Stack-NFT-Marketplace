@@ -37,3 +37,17 @@
   font-size: 1.1rem;
   font-weight: 600;
 }
+
+/* .mint-button[data-mint-started="true"] {
+  display: none;
+} */
+
+.mint-form-inputs[data-mint-started="true"] {
+  display: none;
+}
+
+.note {
+  font-weight: 700;
+  font-size: 1.3rem;
+  width: 350px;
+}

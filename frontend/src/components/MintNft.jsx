@@ -3,11 +3,10 @@ import React from "react";
 import "../styles/mintnft.css";
 import { uploadFileToIPFS, uploadJSONToIPFS } from "../pinata";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import CryptoCrafters from "../CryptoCrafters.json";
 import Marketplace from "../Marketplace.json";
 import { polygonMumbai } from "viem/chains";
-// import { BigInt } from "wagmi";
 import {
   createWalletClient,
   custom,
@@ -19,9 +18,9 @@ import {
   useContractWrite,
   usePrepareContractWrite,
   useContractRead,
+  useWaitForTransaction,
 } from "wagmi";
 import Navbar from "./Navbar";
-import { ethers } from "ethers";
 
 const MintNft = () => {
   const [title, setTitle] = useState();
@@ -33,6 +32,7 @@ const MintNft = () => {
   const [message, updateMessage] = useState("");
   const [tokenId, setTokenId] = useState(null);
   const [tokenIdForListing, setTokenIdForListing] = useState(null);
+  const [openListingModal, setOpenListingModal] = useState(false);
   const active = true;
   const sellerAddress = "0xCDeD68e89f67d6262F82482C2710Ddd52492808a";
   const contractAddress = "0x07bc2329da3D5f73be6183Fae001045Ed4352757";
@@ -54,19 +54,11 @@ const MintNft = () => {
     }
   }
 
-  console.log("token Id --- ", tokenId);
-  console.log("token Id for listing --- ", tokenIdForListing);
-  console.log("Price ", price);
-  // const price2 = ethers.utils.parseUnits(price, "ether");
-  // console.log("sss", price2);
-
   useEffect(() => {
     setOwnerAddress(localStorage.getItem("address"));
     fetchData();
     setTokenIdForListing(tokenId - 1);
   });
-
-  const navigate = useNavigate();
 
   async function OnChangeFile(e) {
     var file = e.target.files[0];
@@ -118,7 +110,11 @@ const MintNft = () => {
     functionName: "setApprovalForAll",
     args: [CryptoCrafters.address, true],
   });
-  const { write: setApproveNftContract } = useContractWrite(approveNftContract);
+  const {
+    isSuccess: approvedIsSuccess,
+    isLoading: approvedIsLoading,
+    write: setApproveNftContract,
+  } = useContractWrite(approveNftContract);
 
   const { config: approveMarketplaceContract } = usePrepareContractWrite({
     address: CryptoCrafters.address,
@@ -126,9 +122,22 @@ const MintNft = () => {
     functionName: "setApprovalForAll",
     args: [Marketplace.address, true],
   });
-  const { write: setApproveMarketplaceContract } = useContractWrite(
-    approveMarketplaceContract
-  );
+  const {
+    isSuccess: approvedMarketplaceIsSuccess,
+    isLoading: approvedMarketplaceIsLoading,
+    write: setApproveMarketplaceContract,
+  } = useContractWrite(approveMarketplaceContract);
+
+  const approveMarketplace = async (e) => {
+    e.preventDefault();
+
+    try {
+      setApproveNftContract();
+      setApproveMarketplaceContract();
+    } catch (error) {
+      alert("Error in approving", error);
+    }
+  };
 
   const { config: mintConfig } = usePrepareContractWrite({
     address: "0x07bc2329da3D5f73be6183Fae001045Ed4352757",
@@ -138,10 +147,33 @@ const MintNft = () => {
   });
   const {
     data: mintData,
-    isLoading,
-    isSuccess,
     write: safeMintNft,
+    isSuccess: ismintStarted,
+    isLoading: isMintLoading,
   } = useContractWrite(mintConfig);
+
+  const {
+    data: waitData,
+    isError: waitError,
+    isSuccess: txIsSuccess,
+  } = useWaitForTransaction({
+    hash: mintData?.hash,
+  });
+
+  const isMinted = txIsSuccess;
+
+  async function mintNft(e) {
+    e.preventDefault();
+
+    try {
+      const metadataURL = await uploadMetadataToIPFS();
+      if (metadataURL === -1) return;
+      console.log("before");
+      safeMintNft();
+    } catch (e) {
+      alert("Upload error --:--> " + e);
+    }
+  }
 
   const { config: listConfig } = usePrepareContractWrite({
     address: "0xcded68e89f67d6262f82482c2710ddd52492808a",
@@ -158,53 +190,17 @@ const MintNft = () => {
     data: listData,
     isLoading: listIsLoading,
     isSuccess: listIsSuccess,
-    write: listingNft,
+    write: listMyNft,
   } = useContractWrite(listConfig);
 
-  async function listNFT(e) {
-    e.preventDefault();
-
-    //Upload data to IPFS
-    try {
-      const metadataURL = await uploadMetadataToIPFS();
-      if (metadataURL === -1) return;
-
-      updateMessage(
-        "Uploading NFT(takes 5 mins).. please dont click anything!"
-      );
-
-      try {
-        safeMintNft();
-      } catch (error) {
-        console.log(error);
-      }
-      isSuccess ? console.log("Nft minted") : console.log("");
-      setApproveNftContract();
-      setApproveMarketplaceContract();
-
-      updateMessage("Successfully minted!");
-      // listingNft();
-
-      // listIsSuccess
-      //   ? console.log("Nft listed to marketplace")
-      //   : console.log("");
-
-      // updateMessage(
-      //   "Uploading NFT(takes 5 mins).. please dont click anything!"
-      // );
-    } catch (e) {
-      alert("Upload error --:--> " + e);
-    }
-  }
-
-  async function listingnft(e) {
-    e.preventDefault();
-    try {
-      if (!isSuccess) {
-        throw new Error("Minting NFT is not complete.");
-      }
-      listingNft();
-
+  const {
+    data: listWaitData,
+    isError: listWaitError,
+    isSuccess: listTxIsSuccess,
+  } = useWaitForTransaction({
+    hash: listData?.hash,
+    onSuccess: async (data) => {
+      console.log("function before on success");
       await axios
         .post("http://localhost:5004/nfts/createnft", {
           title,
@@ -218,25 +214,39 @@ const MintNft = () => {
           active,
         })
         .then((result) => console.log(result));
-      navigate("/");
+      console.log("Function on success completed");
+    },
+  });
+
+  const listingSuccess = listTxIsSuccess;
+
+  const listingNft = async (e) => {
+    e.preventDefault();
+    console.log("before try");
+    try {
+      console.log("Before list function");
+      // console.log(listTxIsSuccess);
+
+      listMyNft();
+      console.log("after list");
     } catch (error) {
       alert("Error--", error);
     }
-  }
+  };
 
   return (
     <div className="mint-comp">
       <Navbar />
       <h1>Mint Your Own Token</h1>
       <div className="mint-form">
-        <p>Your Token ID will be = {tokenId}</p>
+        <p>"{tokenIdForListing}" Nfts Minted</p>
         <p>The Contract address is :</p>
         <p>{contractAddress}</p>
         <p>Seller Address is : </p>
         <p>{sellerAddress}</p>
         <p>Listing price : 0.0025 ethers</p>
 
-        <form>
+        <form className="mint-form-inputs" data-mint-started={isMinted}>
           <label htmlFor="">Title</label>
           <input
             type="text"
@@ -247,7 +257,14 @@ const MintNft = () => {
           <label htmlFor="">Price (in ETH)</label>
           <input
             placeholder="Min 0.01 ETH"
-            onChange={(e) => setPrice(e.target.value)}
+            onChange={(e) => {
+              if (isNaN(e.target.value)) {
+                alert("You can only write price in numbers");
+                e.target.value = ""; // Clear the input field
+              } else {
+                setPrice(e.target.value);
+              }
+            }}
             required={true}
           />
           <label htmlFor="">Description</label>
@@ -261,19 +278,94 @@ const MintNft = () => {
           <label>Upload Image</label>
           <input type={"file"} onChange={OnChangeFile}></input>
           <p>{message}</p>
-          <button type="submit" className="btn list-button" onClick={listNFT}>
-            Mint
-          </button>
-
           <button
             type="submit"
-            className="btn list-button"
-            onClick={listingnft}
+            className="btn mint-button"
+            onClick={mintNft}
+            disabled={isMintLoading || ismintStarted}
           >
-            List
+            {isMintLoading && "Waiting for approval"}
+            {ismintStarted && "Minting..."}
+            {!isMintLoading && !ismintStarted && "Mint"}
           </button>
         </form>
+        {isMinted ? (
+          <div className="flex flex-col">
+            <h3 className="note">
+              Note : You should approve marketplace to use your Nft before
+              listing it to the marketplace
+            </h3>
+            <button
+              type="submit"
+              className="p-3 bg-black text-white border rounded-full w-full font-semibold"
+              onClick={approveMarketplace}
+            >
+              {approvedMarketplaceIsLoading
+                ? "Confirm transactions on metamask"
+                : "Approve Marketplace"}
+            </button>
+            {approvedMarketplaceIsSuccess ? (
+              <div>
+                Want to List your NFT ?{" "}
+                <p
+                  className="p-3 bg-black text-white border rounded-full w-[100px] font-semibold hover:bg-black-300 cursor-pointer"
+                  onClick={() => setOpenListingModal(!openListingModal)}
+                >
+                  Click here
+                </p>
+              </div>
+            ) : (
+              ""
+            )}
+          </div>
+        ) : (
+          ""
+        )}
       </div>
+      {openListingModal && (
+        <div className="fixed left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-50 py-10">
+          <div className="max-h-full w-full max-w-xl overflow-y-auto sm:rounded-2xl bg-white">
+            <div className="w-full">
+              <div className="m-8 my-20 max-w-[400px] mx-auto">
+                <div className="mb-8">
+                  <h1 className="mb-4 text-3xl font-extrabold">
+                    List your Nft to our Marketplace
+                  </h1>
+                  <p className="text-gray-600">
+                    You are about to listing your nft to our marketplace. Hope
+                    you will like our marketplace policies. By clicking the
+                    below button you can list your NFT.
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  <button
+                    className="p-3 bg-black rounded-full text-white w-full font-semibold"
+                    onClick={listingNft}
+                  >
+                    {listIsLoading
+                      ? "Listing, Please be patient!"
+                      : "List My Nft"}
+                  </button>
+                  {listingSuccess ? (
+                    <Link to={"/"}>
+                      <button className="p-3 bg-white border rounded-full w-full font-semibold">
+                        Go to main page
+                      </button>
+                    </Link>
+                  ) : (
+                    <p
+                      className="flex border rounded-full w-[25px] justify-center bg-red p-3 cursor-pointer font-bold"
+                      onClick={() => setOpenListingModal(!openListingModal)}
+                    >
+                      X
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

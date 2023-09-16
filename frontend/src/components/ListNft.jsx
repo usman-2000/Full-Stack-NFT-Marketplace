@@ -1,13 +1,16 @@
 import React, { useState } from "react";
 import "../styles/listnft.css";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Navbar from "./Navbar";
 import CryptoCrafters from "../CryptoCrafters.json";
 import Marketplace from "../Marketplace.json";
 import { createWalletClient, custom, parseEther } from "viem";
 import { mainnet, sepolia, polygonMumbai } from "viem/chains";
-import { useContractWrite, usePrepareContractWrite } from "wagmi";
+import {
+  useContractWrite,
+  usePrepareContractWrite,
+  useWaitForTransaction,
+} from "wagmi";
 
 const ListNft = () => {
   const [title, setTitle] = useState();
@@ -18,10 +21,10 @@ const ListNft = () => {
   const [contractAddress, setContractAddress] = useState();
   const [tokenId, setTokenId] = useState();
   const [active, setActive] = useState(false);
+  const [approve, setApprove] = useState(false);
+  const [openApproveModal, setOpenApproveModal] = useState(false);
 
   const sellerAddress = Marketplace.address;
-
-  const navigate = useNavigate();
 
   const { config: approveNftContract } = usePrepareContractWrite({
     address: CryptoCrafters.address,
@@ -29,7 +32,11 @@ const ListNft = () => {
     functionName: "setApprovalForAll",
     args: [CryptoCrafters.address, true],
   });
-  const { write: setApproveNftContract } = useContractWrite(approveNftContract);
+  const {
+    isSuccess: approvedIsSuccess,
+    isLoading: approvedIsLoading,
+    write: setApproveNftContract,
+  } = useContractWrite(approveNftContract);
 
   const { config: approveMarketplaceContract } = usePrepareContractWrite({
     address: CryptoCrafters.address,
@@ -37,33 +44,51 @@ const ListNft = () => {
     functionName: "setApprovalForAll",
     args: [Marketplace.address, true],
   });
-  const { write: setApproveMarketplaceContract } = useContractWrite(
-    approveMarketplaceContract
-  );
+  const {
+    isSuccess: approvedMarketplaceIsSuccess,
+    isLoading: approvedMarketplaceIsLoading,
+    write: setApproveMarketplaceContract,
+  } = useContractWrite(approveMarketplaceContract);
 
-  const { config } = usePrepareContractWrite({
-    address: "0xCDeD68e89f67d6262F82482C2710Ddd52492808a",
+  const approveMarketplace = async (e) => {
+    e.preventDefault();
+
+    try {
+      setApproveNftContract();
+      setApproveMarketplaceContract();
+      // approvedMarketplaceIsLoading ? setApprove(true) : setApprove(false);
+      console.log(approve);
+    } catch (error) {
+      alert("Error in approving", error);
+    }
+  };
+
+  // ------------ ///////////////////////----------------
+  //          Listing Nft Functionality here
+  // ------------ ///////////////////////----------------
+
+  const { config: listConfig } = usePrepareContractWrite({
+    address: "0xcded68e89f67d6262f82482c2710ddd52492808a",
     abi: Marketplace.abi,
     functionName: "listNft",
     value: parseEther("0.0025"),
-    // args: ["0x07bc2329da3d5f73be6183fae001045ed4352757", 2, 1],
     args: [contractAddress, tokenId, parseEther(price)],
   });
   const {
     data: listData,
     isLoading: listIsLoading,
     isSuccess: listIsSuccess,
-    write: listingNft,
-  } = useContractWrite(config);
+    write: listMyNft,
+  } = useContractWrite(listConfig);
 
-  const handleSubmit = async (e) => {
-    // console.log(walletAddress);
-    e.preventDefault();
-    setApproveNftContract();
-    setApproveMarketplaceContract();
-    listingNft();
-    console.log("list data is :", listData);
-    try {
+  const {
+    data: listWaitData,
+    isError: listWaitError,
+    isSuccess: listTxIsSuccess,
+  } = useWaitForTransaction({
+    hash: listData?.hash,
+    onSuccess: async (data) => {
+      console.log("function before on success");
       await axios
         .post("http://localhost:5004/nfts/createnft", {
           title,
@@ -77,11 +102,20 @@ const ListNft = () => {
           active,
         })
         .then((result) => console.log(result));
-      navigate("/");
+      console.log("Function on success completed");
+    },
+  });
+
+  const listingSuccess = listTxIsSuccess;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log("list data is :", listData);
+    try {
+      listMyNft();
     } catch (error) {
       console.log(error);
-      alert(error.response.data.error);
-      // alert(error);
+      alert("Error in listing is : ", error);
     }
 
     console.log(
@@ -164,10 +198,51 @@ const ListNft = () => {
           </div>
 
           <button type="submit" className="btn" onClick={handleSubmit}>
-            Submit
+            {listIsLoading ? "Listing, Please be patient!" : "Submit"}
+          </button>
+          <button onClick={() => setApprove(true)}>
+            {listingSuccess ? "Approve Marketplace" : ""}
           </button>
         </form>
       </div>
+      {openApproveModal && (
+        <div className="fixed left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-50 py-10">
+          <div className="max-h-full w-full max-w-xl overflow-y-auto sm:rounded-2xl bg-white">
+            <div className="w-full">
+              <div className="m-8 my-20 max-w-[400px] mx-auto">
+                <div className="mb-8">
+                  <h1 className="mb-4 text-3xl font-extrabold">
+                    Approve Marketplace to transfer Nft
+                  </h1>
+                  <p className="text-gray-600">
+                    You are going to approve CryptoCrafters to transfer your
+                    NFTs to the buyer address. It will make the process smooth.
+                    You should not to worry about your Nft.
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  <button
+                    className="p-3 bg-black rounded-full text-white w-full font-semibold"
+                    onClick={approveMarketplace}
+                  >
+                    {approvedMarketplaceIsLoading
+                      ? "Confirm transactions on metamask"
+                      : "Approve Marketplace"}
+                    {}
+                  </button>
+
+                  <p
+                    className="flex border rounded-full w-[25px] justify-center bg-red p-3 cursor-pointer font-bold"
+                    onClick={() => setOpenApproveModal(!openApproveModal)}
+                  >
+                    X
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
