@@ -7,6 +7,8 @@ import { useNavigate, Link } from "react-router-dom";
 import CryptoCrafters from "../CryptoCrafters.json";
 import Marketplace from "../Marketplace.json";
 import { polygonMumbai } from "viem/chains";
+
+import MintingNftModal from "./MintingNftModal";
 import {
   createWalletClient,
   custom,
@@ -33,6 +35,8 @@ const MintNft = () => {
   const [tokenId, setTokenId] = useState(null);
   const [tokenIdForListing, setTokenIdForListing] = useState(null);
   const [openListingModal, setOpenListingModal] = useState(false);
+  const [openAnimation, setOpenAnimation] = useState(false);
+
   const active = true;
   const sellerAddress = "0xCDeD68e89f67d6262F82482C2710Ddd52492808a";
   const contractAddress = "0x07bc2329da3D5f73be6183Fae001045Ed4352757";
@@ -134,6 +138,7 @@ const MintNft = () => {
     try {
       setApproveNftContract();
       setApproveMarketplaceContract();
+      console.log("approved", tokenIdForListing);
     } catch (error) {
       alert("Error in approving", error);
     }
@@ -234,6 +239,15 @@ const MintNft = () => {
     }
   };
 
+  const modalsOpen = () => {
+    setOpenAnimation(true);
+
+    setTimeout(() => {
+      setOpenAnimation(false);
+      setOpenListingModal(!openListingModal);
+    }, 60000); // 60000 milliseconds = 1 minute
+  };
+
   return (
     <div className="mint-comp">
       <Navbar />
@@ -309,7 +323,7 @@ const MintNft = () => {
                 Want to List your NFT ?{" "}
                 <p
                   className="p-3 bg-black text-white border rounded-full w-[100px] font-semibold hover:bg-black-300 cursor-pointer"
-                  onClick={() => setOpenListingModal(!openListingModal)}
+                  onClick={modalsOpen}
                 >
                   Click here
                 </p>
@@ -365,6 +379,9 @@ const MintNft = () => {
             </div>
           </div>
         </div>
+      )}
+      {openAnimation && (
+        <MintingNftModal h2={"Nft is minting, Please wait for some time..."} />
       )}
     </div>
   );
