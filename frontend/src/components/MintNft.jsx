@@ -39,7 +39,7 @@ const MintNft = () => {
 
   const active = true;
   const sellerAddress = "0xCDeD68e89f67d6262F82482C2710Ddd52492808a";
-  const contractAddress = "0x07bc2329da3D5f73be6183Fae001045Ed4352757";
+  const contractAddress = "0x43c99947D6E25497Dc69351FaBb3025F7ACC2A6b";
   const client = createPublicClient({
     chain: polygonMumbai,
     transport: http(),
@@ -48,7 +48,7 @@ const MintNft = () => {
   async function fetchData() {
     try {
       const result = await client.readContract({
-        address: "0x07bc2329da3D5f73be6183Fae001045Ed4352757",
+        address: "0x43c99947D6E25497Dc69351FaBb3025F7ACC2A6b",
         abi: CryptoCrafters.abi,
         functionName: "_tokenIdCounter",
       });
@@ -120,24 +120,24 @@ const MintNft = () => {
     write: setApproveNftContract,
   } = useContractWrite(approveNftContract);
 
-  const { config: approveMarketplaceContract } = usePrepareContractWrite({
-    address: CryptoCrafters.address,
-    abi: CryptoCrafters.abi,
-    functionName: "setApprovalForAll",
-    args: [Marketplace.address, true],
-  });
-  const {
-    isSuccess: approvedMarketplaceIsSuccess,
-    isLoading: approvedMarketplaceIsLoading,
-    write: setApproveMarketplaceContract,
-  } = useContractWrite(approveMarketplaceContract);
+  // const { config: approveMarketplaceContract } = usePrepareContractWrite({
+  //   address: CryptoCrafters.address,
+  //   abi: CryptoCrafters.abi,
+  //   functionName: "setApprovalForAll",
+  //   args: [Marketplace.address, true],
+  // });
+  // const {
+  //   isSuccess: approvedMarketplaceIsSuccess,
+  //   isLoading: approvedMarketplaceIsLoading,
+  //   write: setApproveMarketplaceContract,
+  // } = useContractWrite(approveMarketplaceContract);
 
   const approveMarketplace = async (e) => {
     e.preventDefault();
 
     try {
       setApproveNftContract();
-      setApproveMarketplaceContract();
+      // setApproveMarketplaceContract();
       console.log("approved", tokenIdForListing);
     } catch (error) {
       alert("Error in approving", error);
@@ -145,7 +145,7 @@ const MintNft = () => {
   };
 
   const { config: mintConfig } = usePrepareContractWrite({
-    address: "0x07bc2329da3D5f73be6183Fae001045Ed4352757",
+    address: "0x43c99947D6E25497Dc69351FaBb3025F7ACC2A6b",
     abi: CryptoCrafters.abi,
     functionName: "safeMint",
     args: [ownerAddress, ipfsHash],
@@ -186,7 +186,7 @@ const MintNft = () => {
     functionName: "listNft",
     value: parseEther("0.0025"),
     args: [
-      "0x07bc2329da3D5f73be6183Fae001045Ed4352757",
+      "0x43c99947D6E25497Dc69351FaBb3025F7ACC2A6b",
       tokenIdForListing,
       parseEther(price),
     ],
@@ -314,11 +314,11 @@ const MintNft = () => {
               className="p-3 bg-black text-white border rounded-full w-full font-semibold"
               onClick={approveMarketplace}
             >
-              {approvedMarketplaceIsLoading
+              {approvedIsLoading
                 ? "Confirm transactions on metamask"
                 : "Approve Marketplace"}
             </button>
-            {approvedMarketplaceIsSuccess ? (
+            {approvedIsSuccess ? (
               <div>
                 Want to List your NFT ?{" "}
                 <p
