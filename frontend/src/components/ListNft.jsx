@@ -200,9 +200,9 @@ const ListNft = () => {
           <button type="submit" className="btn" onClick={handleSubmit}>
             {listIsLoading ? "Listing, Please be patient!" : "Submit"}
           </button>
-          <button onClick={() => setApprove(true)}>
+          {/* <button onClick={() => setApprove(true)}>
             {listingSuccess ? "Approve Marketplace" : ""}
-          </button>
+          </button> */}
         </form>
       </div>
       {openApproveModal && (
@@ -228,7 +228,6 @@ const ListNft = () => {
                     {approvedMarketplaceIsLoading
                       ? "Confirm transactions on metamask"
                       : "Approve Marketplace"}
-                    {}
                   </button>
 
                   <p

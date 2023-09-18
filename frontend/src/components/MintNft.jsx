@@ -7,7 +7,6 @@ import { useNavigate, Link } from "react-router-dom";
 import CryptoCrafters from "../CryptoCrafters.json";
 import Marketplace from "../Marketplace.json";
 import { polygonMumbai } from "viem/chains";
-
 import MintingNftModal from "./MintingNftModal";
 import {
   createWalletClient,
@@ -120,24 +119,11 @@ const MintNft = () => {
     write: setApproveNftContract,
   } = useContractWrite(approveNftContract);
 
-  // const { config: approveMarketplaceContract } = usePrepareContractWrite({
-  //   address: CryptoCrafters.address,
-  //   abi: CryptoCrafters.abi,
-  //   functionName: "setApprovalForAll",
-  //   args: [Marketplace.address, true],
-  // });
-  // const {
-  //   isSuccess: approvedMarketplaceIsSuccess,
-  //   isLoading: approvedMarketplaceIsLoading,
-  //   write: setApproveMarketplaceContract,
-  // } = useContractWrite(approveMarketplaceContract);
-
   const approveMarketplace = async (e) => {
     e.preventDefault();
 
     try {
       setApproveNftContract();
-      // setApproveMarketplaceContract();
       console.log("approved", tokenIdForListing);
     } catch (error) {
       alert("Error in approving", error);
@@ -245,7 +231,7 @@ const MintNft = () => {
     setTimeout(() => {
       setOpenAnimation(false);
       setOpenListingModal(!openListingModal);
-    }, 60000); // 60000 milliseconds = 1 minute
+    }, 5000); // 60000 milliseconds = 1 minute
   };
 
   return (
@@ -380,9 +366,7 @@ const MintNft = () => {
           </div>
         </div>
       )}
-      {openAnimation && (
-        <MintingNftModal h2={"Nft is minting, Please wait for some time..."} />
-      )}
+      {openAnimation && <MintingNftModal h2={"Please wait for some time..."} />}
     </div>
   );
 };

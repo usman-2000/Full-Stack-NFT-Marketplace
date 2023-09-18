@@ -110,7 +110,9 @@ exports.updateNftDetails = async (req, res) => {
   const { id } = req.params;
   const { ownerAddress, active } = req.body;
   try {
-    const updateNft = await nfts.findByIdAndUpdate(id, req.body, { new: true });
+    const updateNft = await nfts.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
     res.status(200).json(updateNft);
   } catch (error) {
     res.status(400).json({ error: error });

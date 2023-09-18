@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import "../styles/nftdetailpage.css";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +10,7 @@ import { mainnet, sepolia } from "viem/chains";
 import {
   useContractWrite,
   usePrepareContractWrite,
+  useWaitForTransaction,
   useContractRead,
 } from "wagmi";
 import { createPublicClient } from "viem";
@@ -54,16 +55,32 @@ const NftDetailPage = () => {
     value: parseEther(price),
   });
   const {
-    dataNft,
+    data: dataNft,
     isLoading,
     isSuccess,
     write: buyingNftFromContract,
   } = useContractWrite(config);
 
-  console.log(ownerAddress);
-  console.log(tokenId);
-  console.log(price);
-  console.log(contractAddress);
+  const {
+    data: waitData,
+    isError: waitError,
+    isSuccess: txIsSuccess,
+  } = useWaitForTransaction({
+    hash: dataNft?.hash,
+    onSuccess: async () => {
+      await axios
+        .put(`http://localhost:5004/nfts/updatenft/${params._id}`, {
+          ownerAddress,
+          active: false,
+        })
+        .then((result) => console.log(result.data));
+      navigate("/");
+    },
+  });
+
+  const txIsSuccessed = txIsSuccess;
+
+  const buyingIsSuccess = txIsSuccess;
 
   const buyNft = async () => {
     if (localStorage.getItem("address") === "undefined") {
@@ -73,19 +90,13 @@ const NftDetailPage = () => {
 
     try {
       buyingNftFromContract();
-
-      await axios
-        .put(`http://localhost:5004/nfts/updatenft/${params._id}`, {
-          ownerAddress,
-          active: false,
-        })
-        .then((result) => console.log(result.data));
-
-      navigate("/");
     } catch (error) {
       console.log({ error });
     }
+
+    console.log("initiate");
   };
+
   return (
     <>
       <section className="text-gray-700 body-font overflow-hidden bg-white">
@@ -126,6 +137,15 @@ const NftDetailPage = () => {
                   >
                     Buy Nft
                   </button>
+                )}
+                {buyingIsSuccess ? (
+                  <Link to={"/"}>
+                    <button className="flex ml-auto text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded">
+                      Home Page
+                    </button>
+                  </Link>
+                ) : (
+                  ""
                 )}
               </div>
             </div>
