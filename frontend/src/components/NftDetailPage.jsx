@@ -7,6 +7,7 @@ import CryptoCrafters from "../CryptoCrafters.json";
 import Marketplace from "../Marketplace.json";
 import { createWalletClient, custom, parseEther } from "viem";
 import { mainnet, sepolia } from "viem/chains";
+import LoadingModal from "./LoadingModal";
 import {
   useContractWrite,
   usePrepareContractWrite,
@@ -21,6 +22,14 @@ const NftDetailPage = () => {
   const [contractAddress, setContractAddress] = useState();
   const [tokenId, setTokenId] = useState();
   const [price, setPrice] = useState("");
+  const [description, setDescription] = useState();
+  const [ipfsHash, setIpfsHash] = useState();
+  const [title, setTitle] = useState();
+  const [openInputModal, setOpenInputModal] = useState(false);
+  // const [openLoader, setOpenLoader] = useState(true);
+
+  const sellerAddress = "0xCDeD68e89f67d6262F82482C2710Ddd52492808a";
+
   const navigate = useNavigate();
   const params = useParams();
 
@@ -44,6 +53,7 @@ const NftDetailPage = () => {
 
     fetchData();
     setOwnerAddress(localStorage.getItem("address"));
+    // listingSuccess && window.location.reload();
   }, []);
 
   // Write contract Function
@@ -74,7 +84,7 @@ const NftDetailPage = () => {
           active: false,
         })
         .then((result) => console.log(result.data));
-      navigate("/");
+      window.location.reload();
     },
   });
 
@@ -95,6 +105,59 @@ const NftDetailPage = () => {
     }
 
     console.log("initiate");
+  };
+
+  const { config: listConfig } = usePrepareContractWrite({
+    address: "0xcded68e89f67d6262f82482c2710ddd52492808a",
+    abi: Marketplace.abi,
+    functionName: "listNft",
+    value: parseEther("0.0025"),
+    args: [
+      "0x43c99947D6E25497Dc69351FaBb3025F7ACC2A6b",
+      tokenId,
+      parseEther(price),
+    ],
+  });
+  const {
+    data: listData,
+    isLoading: listIsLoading,
+    isSuccess: listIsSuccess,
+    write: listMyNft,
+  } = useContractWrite(listConfig);
+
+  const {
+    data: listWaitData,
+    isError: listWaitError,
+    isSuccess: listTxIsSuccess,
+  } = useWaitForTransaction({
+    hash: listData?.hash,
+    onSuccess: async () => {
+      console.log("function before on success");
+      await axios
+        .put(`http://localhost:5004/nfts/updatenft/${params._id}`, {
+          price,
+          active: true,
+        })
+        .then((result) => console.log(result));
+      console.log("Function on success completed");
+      window.location.reload();
+    },
+  });
+
+  const listingSuccess = listTxIsSuccess;
+
+  const listingNft = async (e) => {
+    e.preventDefault();
+    console.log("before try");
+    try {
+      console.log("Before list function");
+      // console.log(listTxIsSuccess);
+
+      listMyNft();
+      console.log("after list");
+    } catch (error) {
+      alert("Error--", error);
+    }
   };
 
   return (
@@ -138,20 +201,75 @@ const NftDetailPage = () => {
                     Buy Nft
                   </button>
                 )}
-                {buyingIsSuccess ? (
-                  <Link to={"/"}>
-                    <button className="flex ml-auto text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded">
-                      Home Page
-                    </button>
-                  </Link>
+                {!data.active ? (
+                  <button
+                    className="flex ml-auto text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded"
+                    onClick={() => setOpenInputModal(!openInputModal)}
+                  >
+                    Re-sell
+                  </button>
                 ) : (
                   ""
                 )}
               </div>
             </div>
           </div>
+          {/* {openLoader && <LoadingModal />} */}
         </div>
       </section>
+      {openInputModal && (
+        <div className="flex flex-wrap min-h-screen w-full content-center justify-center py-10 modal fixed">
+          <div className="flex shadow-md">
+            <div className="flex flex-wrap content-center justify-center rounded-md bg-white w-[24rem] h-[24rem] border border-red-500 border-dashed">
+              <div className="w-72">
+                <h1 className="text-xl font-semibold">Welcome back</h1>
+                <small className="text-gray-400">
+                  Welcome back! Please enter the price on which you want to
+                  re-sell your nft
+                </small>
+
+                <form className="mt-4">
+                  <div className="mb-3">
+                    <label className="mb-2 block text-xs font-semibold">
+                      Price
+                    </label>
+                    <input
+                      placeholder="Enter Price"
+                      class="block w-full rounded-md border border-gray-300 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 py-1 px-1.5 text-gray-500"
+                      onChange={(e) => {
+                        if (isNaN(e.target.value)) {
+                          alert("You can only write price in numbers");
+                          e.target.value = ""; // Clear the input field
+                        } else {
+                          setPrice(e.target.value);
+                        }
+                      }}
+                      required={true}
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <button
+                      className="mb-1.5 block w-full text-center text-white bg-red-500 hover:bg-red-600 px-2 py-1.5 rounded-md"
+                      onClick={listingNft}
+                    >
+                      {listIsLoading ? "Waiting for the approval.." : "List"}
+                    </button>
+                    <button
+                      className="mb-1.5 block w-[30px] text-center text-white bg-red-500 hover:bg-red-600 px-2 py-1.5 rounded-md"
+                      onClick={() => setOpenInputModal(!openInputModal)}
+                    >
+                      X
+                    </button>
+                  </div>
+                </form>
+                {/* {!listingSuccess && <LoadingModal />} */}
+                {listIsSuccess && !listingSuccess ? <LoadingModal /> : ""}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
